@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>راصد — الرائد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="rased.css">
+<style>
+.stick{position:sticky;top:0;z-index:20}.stick .top{position:static}.bar2{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 4px 12px rgba(15,34,54,.05)}
+.bar2 .wrap{display:grid;grid-template-columns:1fr;gap:10px;padding-top:12px;padding-bottom:12px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tools input{padding:10px 12px;font-size:15px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sum div{background:var(--soft);border-radius:12px;padding:6px 4px;text-align:center;font-size:12px;color:var(--mute)}
+.sum b{display:block;font-size:22px;line-height:1.2;color:var(--brand-ink)}
+.sum .a{background:var(--red-soft);color:#b42328}.sum .a b{color:var(--red)}
+.sum .p{background:var(--green-soft);color:#11803a}.sum .p b{color:var(--green)}
+.state{margin:14px 0 4px;padding:11px 14px;border-radius:12px;font-size:13.5px;display:flex;gap:8px;align-items:center}
+.state.done{background:var(--green-soft);color:#11803a}.state.new{background:var(--gold-soft);color:#7a5200}.state.pend{background:#eef2ff;color:#3346a8}
+.state.off{background:var(--red-soft);color:#b42328}
+.list{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0 120px}
+.st{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;cursor:pointer;
+  user-select:none;-webkit-tap-highlight-color:transparent;transition:background .12s,border-color .12s;text-align:right;width:100%}
+.st:hover{border-color:var(--brand2)}
+.st .n{width:34px;height:34px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:none}
+.st .nm{flex:1;min-width:0;font-size:15px}
+.st .nm small{display:block;font-size:11.5px;color:var(--mute);font-weight:600}
+.st .tg{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--green-soft);color:#11803a;flex:none}
+.st.abs{background:var(--red-soft);border-color:#f3b4b6}
+.st.abs .n{background:var(--red);color:#fff}.st.abs .tg{background:var(--red);color:#fff}
+.save{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:18;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px))}
+.save .wrap{display:flex;gap:8px}
+.save .btn-p{flex:1;font-size:16px;padding:14px}
+@media(min-width:640px){.bar2 .wrap{grid-template-columns:1.2fr 1fr;align-items:center}.list{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.list{grid-template-columns:1fr 1fr 1fr}.bar2 .wrap{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- الدخول -->
+<section id="login" class="login">
+ <form class="card" id="lf" autocomplete="on">
+  <div class="lg" id="lg"></div>
+  <label for="u">اسم المستخدم</label><input id="u" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+  <label for="p">كلمة السر</label><input id="p" type="password" autocomplete="current-password" required>
+  <button class="btn btn-p full" style="margin-top:16px" id="go">دخول</button>
+  <div class="err" id="lerr"></div>
+  <div class="demo hide" id="demo">وضع تجريبي — حساب كل رائد: <b>raed1 / 1111</b> لأولى أول، <b>raed2 / 2222</b> لأولى ثاني… لحد <b>raed7 / 7777</b></div>
+ </form>
+</section>
+
+<!-- التطبيق -->
+<section id="app" class="hide">
+ <div class="stick"><header class="top"><div class="wrap">
+  <div class="brand" id="hb"></div>
+  <div class="act"><span class="net" id="net"></span><button class="ghost" id="out">خروج</button></div>
+ </div></header>
+ <div class="bar2"><div class="wrap">
+  <div class="tools">
+   <input type="date" id="day" aria-label="التاريخ">
+   <input type="search" id="q" placeholder="بحث بالاسم…" aria-label="بحث">
+  </div>
+  <div class="sum"><div class="p"><b id="np">0</b>حاضر</div><div class="a"><b id="na">0</b>غائب</div><div><b id="nt">0</b>الإجمالي</div></div>
+ </div></div></div>
+ <main class="wrap">
+  <div class="state" id="state"></div>
+  <p class="hint" style="margin:6px 2px 0">اضغط على اسم الطالب <b>الغائب</b> بس — الباقي بيتسجّل حاضر.</p>
+  <div class="list" id="list"></div>
+ </main>
+ <div class="save"><div class="wrap">
+  <button class="btn btn-o" id="clr" title="الكل حاضر">الكل حاضر</button>
+  <button class="btn btn-p" id="sv">تسجيل الغياب</button>
+ </div></div>
+</section>
+
+<script src="config.js"></script>
+<script src="rased-core.js"></script>
+<script>
+(function(){
+var $=RS.$,esc=RS.esc;RS.init("raed");
+var S=null,D=null,abs={},day=RS.today(),clsName="";
+
+$("lg").innerHTML=RS.logo()+'<h1>راصد</h1><p>'+esc(CONFIG.SCHOOL_NAME)+'</p><span class="tag">تسجيل الغياب — رائد الفصل</span>';
+if(RS.isDemo())$("demo").classList.remove("hide");
+
+$("lf").onsubmit=function(e){e.preventDefault();$("go").disabled=true;$("lerr").textContent="";
+ RS.login($("u").value,$("p").value,["raed"]).then(function(r){$("go").disabled=false;
+  if(!r.ok){$("lerr").textContent=r.error;return}
+  $("p").value="";start(r.session)})};
+$("out").onclick=function(){if(RS.outbox().length&&!confirm("في غياب محفوظ على الجهاز لسه متبعتش. هيتبعت أول ما تدخل تاني والنت شغال. تخرج؟"))return;
+ RS.logout();S=null;$("app").classList.add("hide");$("login").classList.remove("hide")};
+
+var drawNet=RS.netBadge($("net"));
+function start(s){S=s;$("login").classList.add("hide");$("app").classList.remove("hide");
+ $("day").max=RS.today();$("day").value=day;
+ D=RS.cached(s);if(D)render();else $("list").innerHTML='<p class="hint">جاري تحميل قائمة الفصل…</p>';
+ refresh()}
+function refresh(){RS.flush().then(function(){return RS.fetchData(S)}).then(function(d){D=d;render()},function(e){
+  if(!RS.session()){location.reload();return}
+  if(!D)$("list").innerHTML='<div class="state off">مفيش نت ولسه القائمة متحمّلتش على الجهاز ده. شغّل النت مرة واحدة وافتح تاني.</div>';
+  drawNet()})}
+window.addEventListener("online",function(){if(S)RS.flush().then(function(r){if(r.sent)RS.toast("اتبعت الغياب المحفوظ ("+r.sent+")","ok");drawNet();refresh()})});
+
+function rows(){return RS.merged(D)}
+function rec(){return rows().filter(function(r){return r.date===day&&+r.classId===+S.user.classId})[0]}
+function loadDay(){abs={};var r=rec();if(r)(r.absent||[]).forEach(function(id){abs[id]=true})}
+function render(){
+ var c=(D.classes||[])[0];clsName=c?c.name:"فصل "+S.user.classId;
+ $("hb").innerHTML=RS.logo()+'<div style="min-width:0"><h1>'+esc(clsName)+'</h1><p>'+esc(S.user.name||S.u)+' · '+esc(CONFIG.SCHOOL_NAME)+'</p></div>';
+ document.title="راصد — "+clsName;loadDay();draw();drawNet()}
+function termAbs(id){var n=0;rows().forEach(function(r){if((r.absent||[]).indexOf(id)!==-1)n++});return n}
+function draw(){
+ var st=D.students||[],q=$("q").value.trim(),h="",na=0,r=rec();
+ st.forEach(function(s,i){var a=!!abs[s.id];if(a)na++;
+  if(q&&String(s.name).indexOf(q)===-1)return;
+  var t=termAbs(s.id);
+  h+='<button type="button" class="st'+(a?" abs":"")+'" data-id="'+s.id+'"><span class="n">'+(i+1)+'</span><span class="nm">'+esc(s.name)+
+   '<small>'+(t?"غاب "+t+" يوم من بداية الترم":"منتظم")+'</small></span><span class="tg">'+(a?"غائب":"حاضر")+'</span></button>'});
+ $("list").innerHTML=h||'<p class="hint">مفيش أسماء مطابقة.</p>';
+ $("na").textContent=na;$("np").textContent=st.length-na;$("nt").textContent=st.length;
+ var el=$("state");
+ if(!RS.isSchoolDay(day)){el.className="state off";el.textContent="اليوم ده إجازة ("+RS.arDate(day)+") — اتأكد من التاريخ."}
+ else if(r&&r.pending){el.className="state pend";el.textContent="محفوظ على الجهاز وهيتبعت للشيت أول ما النت يرجع — "+RS.arDate(day)}
+ else if(r){el.className="state done";el.textContent="✓ اتسجّل "+RS.arDate(day)+" — "+RS.arTime(r.at)+". لو عدّلت ودوست تسجيل هيتحدّث نفس السجل."}
+ else{el.className="state new";el.textContent="لسه ماتسجلش غياب "+RS.arDate(day)}
+ $("sv").textContent=r?"تحديث الغياب ("+na+" غائب)":"تسجيل الغياب ("+na+" غائب)"}
+
+$("list").addEventListener("click",function(e){var b=e.target.closest(".st");if(!b)return;var id=+b.dataset.id;abs[id]=!abs[id];draw()});
+$("q").oninput=draw;
+$("day").onchange=function(){var v=this.value;if(!v||v>RS.today()){this.value=day;return}day=v;loadDay();draw()};
+$("clr").onclick=function(){abs={};draw()};
+$("sv").onclick=function(){
+ if(!RS.isSchoolDay(day)&&!confirm("اليوم ده إجازة. تسجّل برضه؟"))return;
+ var ids=(D.students||[]).filter(function(s){return abs[s.id]}).map(function(s){return s.id});
+ $("sv").disabled=true;
+ RS.queueSave(S,{date:day,classId:S.user.classId,absent:ids}).then(function(r){$("sv").disabled=false;
+  if(r.failed&&r.failed.length)RS.toast(r.failed[0],"bad");
+  else if(r.left)RS.toast("مفيش نت — اتحفظ على الجهاز وهيتبعت لوحده أول ما النت يرجع");
+  else RS.toast("✓ اتسجّل الغياب — "+ids.length+" غائب","ok");
+  draw();drawNet();if(!r.left)refresh()})};
+setInterval(function(){if(S&&navigator.onLine&&RS.outbox().length)RS.flush().then(function(r){drawNet();if(r.sent)refresh()})},30000);
+
+var s0=RS.session();if(s0)start(s0);
+})();
+</script>
+</body>
+</html>
