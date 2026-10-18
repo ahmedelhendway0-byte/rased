@@ -143,7 +143,7 @@ $("sv").onclick=function(){
   draw();drawNet();if(!r.left)refresh()})};
 setInterval(function(){if(S&&navigator.onLine&&RS.outbox().length)RS.flush().then(function(r){drawNet();if(r.sent)refresh()})},30000);
 
-var s0=RS.session();if(s0)start(s0);
+RS.prefill($("u"),$("p"));var s0=RS.session();if(s0)start(s0);
 })();
 </script>
 </body>
