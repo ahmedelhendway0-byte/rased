@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>راصد — طريقة التشغيل</title>
+<link rel="stylesheet" href="rased.css">
+<style>
+main{max-width:860px;margin:0 auto;padding:24px 16px 40px}
+.card{margin-bottom:16px}h2{font-size:19px;margin-bottom:10px}h3{font-size:15px;margin:14px 0 6px}
+p,li{font-size:14.5px;line-height:2;color:#24384d}ol,ul{padding-inline-start:22px;margin:6px 0}
+code{direction:ltr;display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:13px;font-family:Consolas,monospace}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:6px 0}td,th{border:1px solid var(--line);padding:7px 9px;text-align:right}th{background:var(--brand-soft);color:var(--brand-ink)}
+.tbl{overflow-x:auto}.note{background:var(--gold-soft);border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.9;color:#5f4300}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand"><div id="lg" style="display:contents"></div><div><h1>راصد — طريقة التشغيل</h1><p>إزاي تربط التطبيق بشيت جوجل وتغيّر البيانات</p></div></div></div></header>
+<main>
+
+<div class="card"><h2>الملفات</h2>
+<div class="tbl"><table>
+<tr><th>الملف</th><th>وظيفته</th></tr>
+<tr><td><code>raed.html</code></td><td>تطبيق رائد الفصل — كل رائد يشوف فصله بس ويسجّل الغياب</td></tr>
+<tr><td><code>admin.html</code></td><td>لوحة الإدارة (منفصلة) — كل الفصول، مين سجّل ومين لأ، سجل الشهر، غياب 15+ و30+ يوم</td></tr>
+<tr><td><code>config.js</code></td><td><b>ملف الإعدادات</b> — رابط الشيت، اسم المدرسة، بداية الترم، الإجازات، حدود التنبيه</td></tr>
+<tr><td><code>google-apps-script.gs</code></td><td>الكود اللي بيتحط جوه شيت جوجل وبيشتغل كسيرفر</td></tr>
+<tr><td><code>rased-core.js</code> · <code>rased.css</code> · <code>sw.js</code></td><td>كود وتصميم مشترك وتشغيل بدون نت — مش محتاج تعدّل فيهم</td></tr>
+</table></div>
+<p>الملفات كلها لازم تفضل جنب بعض في نفس الفولدر.</p>
+</div>
+
+<div class="card"><h2>1) تجربة سريعة من غير شيت (الوضع التجريبي)</h2>
+<p>افتح <code>raed.html</code> أو <code>admin.html</code> في المتصفح على طول. طول ما <code>API_URL</code> فاضي في <code>config.js</code> التطبيق بيشتغل ببيانات تجريبية من غير نت:</p>
+<ul><li>7 فصول (أولى أول ← أولى سابع)، 40 طالب في كل فصل، غياب من أول الترم (1 سبتمبر) لحد النهارده.</li>
+<li>أولى أول لحد أولى رابع سجّلوا النهارده، والباقي لأ — عشان تشوف الحالتين في لوحة الإدارة.</li>
+<li>الحسابات: <code>admin / 9999</code> للإدارة، و<code>raed1 / 1111</code> … <code>raed7 / 7777</code> للرواد.</li></ul>
+</div>
+
+<div class="card"><h2>2) ربط التطبيق بشيت جوجل بتاعتك</h2>
+<ol>
+<li>افتح <code>sheets.new</code> واعمل شيت جديد فاضي، وسمّيه مثلاً «راصد».</li>
+<li>من <b>File ← Settings</b> خلّي الـ Time zone = <b>(GMT+02:00) Cairo</b>.</li>
+<li>من القايمة <b>Extensions ← Apps Script</b>. امسح الكود اللي هناك والصق كل محتوى <code>google-apps-script.gs</code>.</li>
+<li>غيّر السطر <code>var SECRET = '...'</code> لأي كلام عشوائي طويل، ودوس حفظ.</li>
+<li>من فوق اختار الدالة <code>setupDemo</code> ودوس <b>Run</b>. جوجل هيطلب صلاحيات — وافق (Advanced ← Go to project). الدالة دي بتعمل 4 تابات وتملاها بيانات تجريبية.</li>
+<li>دوس <b>Deploy ← New deployment</b> ← النوع <b>Web app</b>:
+ <ul><li>Execute as: <b>Me</b></li><li>Who has access: <b>Anyone</b></li></ul>
+ دوس Deploy وانسخ الرابط اللي بينتهي بـ <code>/exec</code>.</li>
+<li>افتح <code>config.js</code> وحط الرابط: <code>API_URL: "https://script.google.com/macros/s/.../exec",</code></li>
+</ol>
+<p>من اللحظة دي: الأسماء والحسابات بتتقرا من الشيت، وكل ما الرائد يدوس «تسجيل الغياب» بيتكتب سطر في تاب <b>الغياب</b>.</p>
+<div class="note">⚠ <code>setupDemo</code> بتمسح التابات الأربعة وتكتب الديمو من جديد — شغّلها مرة واحدة بس في الأول. ولو عدّلت كود الـ Apps Script بعد كده لازم تعمل <b>Deploy ← Manage deployments ← Edit ← New version</b> عشان التعديل يشتغل.</div>
+</div>
+
+<div class="card"><h2>3) تغيير الأسماء والحسابات (من الشيت)</h2>
+<p>أي تعديل في الشيت بيظهر في التطبيق عند الرائد أول ما يفتح أو يرجع النت، وعند الإدارة تلقائيًا كل دقيقتين أو بزرار «تحديث».</p>
+<h3>تاب «المستخدمين»</h3>
+<div class="tbl"><table><tr><th>username</th><th>password</th><th>role</th><th>class_id</th><th>name</th></tr>
+<tr><td>admin</td><td>9999</td><td>admin</td><td></td><td>مدير المدرسة</td></tr>
+<tr><td>raed1</td><td>1111</td><td>raed</td><td>1</td><td>رائد أولى أول</td></tr></table></div>
+<ul><li>عشان تغيّر كلمة سر: عدّلها في عمود <code>password</code>. الجلسة القديمة بتتقفل تلقائيًا والرائد يدخل بالجديدة.</li>
+<li>رائد جديد: سطر جديد بـ <code>role = raed</code> ورقم فصله في <code>class_id</code>. حساب إدارة إضافي: <code>role = admin</code>.</li>
+<li>حساب <code>raed</code> مايقدرش يدخل لوحة الإدارة، وحساب <code>admin</code> مايدخلش تطبيق الرائد — والسيرفر نفسه مش بيبعت للرائد غير بيانات فصله.</li></ul>
+<h3>تاب «الفصول»</h3><p><code>class_id</code> (رقم) و<code>class_name</code> (اسم الفصل زي «أولى أول»). تقدر تضيف فصول جديدة.</p>
+<h3>تاب «الطلاب»</h3><p><code>student_id</code> (رقم مميز لكل طالب — ماينفعش يتكرر)، <code>class_id</code>، <code>name</code>. عدّل الاسم، أو انقل الطالب لفصل تاني بتغيير <code>class_id</code>، أو امسح السطر عشان يختفي. لما تحط الأسماء الحقيقية، امسح الأسماء التجريبية والصق الحقيقية بنفس الأعمدة.</p>
+<h3>تاب «الغياب»</h3><p>سطر لكل فصل في كل يوم: التاريخ، الفصل، عدد الغياب والحضور، أرقام وأسماء الغايبين، مين سجّل وإمتى. لو الرائد سجّل تاني لنفس اليوم بيتحدّث نفس السطر. لو حبيت تمسح بيانات الديمو قبل التشغيل الحقيقي: امسح كل السطور تحت العناوين.</p>
+</div>
+
+<div class="card"><h2>4) الشغل من غير نت</h2>
+<ul><li>أول دخول لازم يكون والنت شغال (عشان يحمّل قايمة الفصل). بعد كده التطبيق يفتح ويشتغل من غير نت على نفس الجهاز.</li>
+<li>لو الرائد سجّل والنت فاصل: الغياب بيتحفظ على الجهاز ويظهر «في انتظار الإرسال»، وبيتبعت للشيت لوحده أول ما النت يرجع.</li>
+<li>الإدارة من غير نت بتشوف آخر نسخة اتحمّلت، ومكتوب تحت الصفحة وقت آخر تحديث.</li>
+<li>عشان يفتح على الموبايل من غير نت كتطبيق: ارفع الفولدر على موقع (زي GitHub Pages أو Netlify) وافتح الرابط مرة والنت شغال، وبعدين «إضافة للشاشة الرئيسية». لو فتحت الملف من الجهاز مباشرة هو أصلًا شغال من غير نت.</li>
+<li>الخط (Cairo) بيتحمّل من النت؛ من غير نت بيستخدم خط الجهاز وده طبيعي.</li></ul>
+</div>
+
+<div class="card"><h2>5) الإعدادات في config.js</h2>
+<ul><li><code>TERM_START</code>: بداية الترم — إجمالي أيام الغياب بيتحسب منه. (لازم يتطابق مع <code>DEMO.TERM_START</code> في الـ Apps Script لو هتستخدم الديمو.)</li>
+<li><code>WEEKEND</code>: أيام الإجازة الأسبوعية (5 = الجمعة، 6 = السبت). <code>HOLIDAYS</code>: الإجازات الرسمية بالتاريخ.</li>
+<li><code>WARN_DAYS</code> = 15 و <code>DROP_DAYS</code> = 30: حدود قوايم التنبيه.</li>
+<li><code>DEMO_USERS</code>: حسابات الوضع التجريبي بس (من غير شيت).</li></ul>
+<div class="note">ملاحظة أمان: الإصدار ده تجريبي — كلمات السر مكتوبة في الشيت نفسه، فخلّي الشيت خاص ليك ومتشاركهوش. لما نعمل نظام دخول حقيقي هنقفل الحتة دي.</div>
+</div>
+</main>
+<footer>Powered by HINDAWY</footer>
+<script src="rased-core.js"></script>
+<script>document.getElementById("lg").innerHTML=RS.logo();</script>
+</body>
+</html>
