@@ -7,6 +7,16 @@
   var RS = (window.RS = {});
   var C = window.CONFIG || {};
 
+  /* ?demo=1 في الرابط = وضع تجريبي ببيانات وهمية (للعرض)، من غير ما يلمس الشيت الحقيقي.
+     ?as=raed1 كمان = يملا بيانات الدخول التجريبية */
+  if (/[?&]demo=1(&|$)/.test(location.search)) C.API_URL = "";
+  RS.prefill = function (uEl, pEl) {
+    var m = location.search.match(/[?&]as=([\w-]+)/);
+    if (!m || C.API_URL) return;
+    var x = (C.DEMO_USERS || []).filter(function (d) { return d.username === m[1]; })[0];
+    if (x) { uEl.value = x.username; pEl.value = x.password; }
+  };
+
   /* ---------------- أدوات عامة ---------------- */
   RS.$ = function (id) { return document.getElementById(id); };
   RS.esc = function (s) {
