@@ -284,7 +284,7 @@ function csvClass(c,ss,days,m){var rows=[["الكود","الاسم"].concat(days
  ss.forEach(function(s){var mt=0;rows.push([s.id,s.name].concat(days.map(function(d){var r=R(d,c.id);if(!r)return"";var a=(r.absent||[]).indexOf(s.id)!==-1;if(a)mt++;return a?"غ":"ح"})).concat([mt,X.abs[s.id]]))});
  csv(c.name+"-"+m+".csv",rows)}
 
-var s0=RS.session();if(s0)start(s0);
+RS.prefill($("u"),$("p"));var s0=RS.session();if(s0)start(s0);
 })();
 </script>
 </body>
