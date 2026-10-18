@@ -1,7 +1,7 @@
 /* راصد — بيخلي التطبيق يفتح من غير نت لما يكون مرفوع على موقع (https).
    لو عدّلت أي ملف، زوّد رقم النسخة عشان الأجهزة تاخد التعديل. */
-var V = "rased-v8-1";
-var FILES = ["raed.html", "admin.html", "rased.css", "rased-core.js", "config.js"];
+var V = "rased-v8-2";
+var FILES = ["raed.html", "admin.html", "rased.css", "rased-core.js", "config.js", "presentation.html"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(V).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
