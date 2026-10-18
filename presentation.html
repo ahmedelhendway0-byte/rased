@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071c2c">
+<title>Empowering Human Skills — راصد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#071c2c; --night2:#0b2a40; --ink:#0f2236; --paper:#f4f7f8; --mute:#5f7186; --line:#dbe4ea;
+  --teal:#14b8a6; --teal2:#0f766e; --gold:#f5b544; --red:#e5484d; --green:#16a34a; --sky:#7dd3fc;
+  --soft:#cfe7e4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--night);overflow:hidden}
+body{font-family:Cairo,"Segoe UI",Tahoma,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.en{font-family:Outfit,Cairo,sans-serif;direction:ltr;unicode-bidi:isolate}
+button{font:inherit;cursor:pointer;color:inherit}
+
+/* ---------- المسرح 1600×900 بيتكبّر على أي شاشة ---------- */
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1600px;height:900px;position:relative;flex:none;transform-origin:center center;overflow:hidden;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.slide{position:absolute;inset:0;padding:70px 90px 110px;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .55s ease,visibility .55s}
+.slide.on{opacity:1;visibility:visible}
+.dark{background:radial-gradient(1100px 700px at 85% 10%,#0e3a52 0,transparent 60%),radial-gradient(900px 600px at 0% 100%,#0b3b37 0,transparent 55%),var(--night);color:#eaf6f5}
+.light{background:radial-gradient(900px 600px at 100% 0,#e3f4f1 0,transparent 60%),var(--paper)}
+.gold{background:linear-gradient(135deg,#0f766e,#0b3b5c);color:#fff}
+
+/* دخول العناصر */
+.rv{opacity:0}
+.slide.on .rv{animation:rise .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 110ms + 150ms)}
+.slide.on .rv.pop{animation-name:pop}
+.slide.on .rv.fade{animation-name:fadein}
+@keyframes rise{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+.eyebrow{font-size:22px;font-weight:800;letter-spacing:.5px;color:var(--teal2);display:flex;align-items:center;gap:10px}
+.dark .eyebrow{color:var(--teal)}
+.eyebrow i{width:34px;height:3px;background:currentColor;border-radius:3px;display:inline-block}
+h1,h2,h3{margin:0}
+.title{font-size:58px;font-weight:900;line-height:1.2;margin-top:10px;color:var(--ink)}
+.dark .title{color:#fff}
+.lead{font-size:26px;line-height:1.75;color:var(--mute);margin:14px 0 0;max-width:1100px}
+.dark .lead{color:#b7d6d3}
+.grow{flex:1;min-height:0}
+
+/* زراير الديمو تحت كل موضوع */
+.acts{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.act{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:14px;padding:14px 22px;font-size:21px;font-weight:800;
+  background:var(--teal2);color:#fff;box-shadow:0 8px 22px rgba(15,118,110,.28);transition:transform .15s,box-shadow .15s}
+.act:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(15,118,110,.38)}
+.act.ghost{background:#fff;color:var(--teal2);border:2px solid #bfe3de;box-shadow:none}
+.dark .act.ghost{background:rgba(255,255,255,.08);color:#d9f3f0;border-color:rgba(255,255,255,.25)}
+.act.gold{background:var(--gold);color:#3b2a00;box-shadow:0 8px 22px rgba(245,181,68,.3)}
+.act svg{width:22px;height:22px}
+
+/* بطاقات */
+.cards{display:grid;gap:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 10px 30px rgba(15,34,54,.06)}
+.dark .card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);box-shadow:none}
+.card h3{font-size:27px;font-weight:800;margin:14px 0 6px}
+.card p{font-size:21px;line-height:1.7;color:var(--mute);margin:0}
+.dark .card p{color:#b7d6d3}
+.ic{width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:#e6f6f4;color:var(--teal2)}
+.ic svg{width:34px;height:34px}
+.ic.r{background:#fdecec;color:var(--red)}.ic.g{background:#fff4dc;color:#b07800}.ic.b{background:#e7f1ff;color:#2563eb}
+.dark .ic{background:rgba(20,184,166,.15);color:var(--teal)}
+
+/* شريط التحكم */
+#hud{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;gap:14px;padding:0 28px;z-index:30;pointer-events:none}
+#hud>*{pointer-events:auto}
+#brand{font-size:17px;font-weight:700;opacity:.7;display:flex;align-items:center;gap:8px}
+#brand b{font-family:Outfit,sans-serif;letter-spacing:2px}
+.navb{width:44px;height:44px;border-radius:12px;border:1px solid rgba(127,140,150,.35);background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.navb svg{width:22px;height:22px}
+#count{direction:ltr;font-size:17px;font-weight:700;min-width:70px;text-align:center;font-family:Outfit,sans-serif}
+#bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(127,140,150,.2);z-index:31}
+#bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--teal));transition:width .5s}
+.hud-dark{color:#d9f3f0}.hud-light{color:var(--ink)}
+.sp{flex:1}
+
+/* اللوجو */
+.logo svg{width:100%;height:100%}
+
+/* ---------- 1. الغلاف ---------- */
+#s-cover{align-items:center;justify-content:center;text-align:center}
+.orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;animation:float 12s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+.cover-logo{width:170px;height:170px;position:relative;margin-bottom:26px}
+.ring{position:absolute;inset:-18px;border:2px solid rgba(20,184,166,.55);border-radius:50px;animation:ring 2.8s ease-out infinite}
+.ring.b{animation-delay:1.4s}
+@keyframes ring{from{transform:scale(.85);opacity:.9}to{transform:scale(1.45);opacity:0}}
+.cover-en{font-family:Outfit,sans-serif;font-size:104px;font-weight:800;line-height:1;letter-spacing:-2px;direction:ltr;
+  background:linear-gradient(90deg,#fff 0%,#9ff3e8 45%,var(--gold) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  background-size:200% 100%;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+.cover-ar{font-size:40px;font-weight:800;margin-top:18px;color:#fff}
+.cover-sch{font-size:23px;color:#9cc5c1;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border-radius:40px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-size:18px;color:#cfeeea;margin-top:34px}
+.pill b{font-family:Outfit,sans-serif;letter-spacing:3px;color:var(--gold)}.pill{direction:ltr}
+
+/* ---------- 2. المقولة ---------- */
+#s-quote{justify-content:center;align-items:center;text-align:center}
+.q-mark{font-family:Georgia,serif;font-size:220px;line-height:.6;color:var(--gold);opacity:.9;height:110px}
+.q-en{font-family:Outfit,sans-serif;font-weight:300;font-size:56px;line-height:1.35;color:#fff;direction:ltr;max-width:1250px}
+.q-en b{font-weight:700;color:#9ff3e8}
+.q-ar{font-size:30px;color:#b7d6d3;margin-top:28px;line-height:1.7}
+.q-by{direction:ltr;margin-top:28px;font-family:Outfit,sans-serif;letter-spacing:5px;font-weight:700;color:var(--gold);font-size:22px}
+
+/* ---------- 3. المشكلة ---------- */
+.papers{position:absolute;left:10px;top:150px;width:400px;height:560px;pointer-events:none}
+.ppr{position:absolute;width:150px;height:190px;background:#fff;border-radius:10px;box-shadow:0 12px 30px rgba(15,34,54,.15);padding:18px}
+.ppr i{display:block;height:9px;border-radius:5px;background:#e3e8ee;margin-bottom:12px}
+.ppr i:nth-child(2){width:70%}.ppr i:nth-child(4){width:50%}
+.slide.on .ppr{animation:drift 7s ease-in-out infinite}
+@keyframes drift{0%{transform:translate(0,0) rotate(var(--r))}50%{transform:translate(-30px,40px) rotate(calc(var(--r) + 14deg));opacity:.7}100%{transform:translate(0,0) rotate(var(--r))}}
+.ppr .x{position:absolute;top:-14px;left:-14px;width:40px;height:40px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px}
+
+/* ---------- 4. الحل ---------- */
+.pillars{grid-template-columns:repeat(3,1fr);margin-top:34px}
+.big-n{font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:var(--teal2);opacity:.6}
+
+/* ---------- 5. الفلو ---------- */
+.flow{position:relative;display:flex;justify-content:space-between;align-items:center;margin-top:110px;padding:0 20px}
+.node{width:230px;text-align:center;position:relative;z-index:2}
+.node .bx{width:150px;height:150px;margin:0 auto;border-radius:36px;background:#fff;border:1px solid var(--line);box-shadow:0 18px 40px rgba(15,34,54,.1);display:flex;align-items:center;justify-content:center;color:var(--teal2)}
+.node .bx svg{width:72px;height:72px}
+.node h3{font-size:26px;font-weight:800;margin-top:18px}
+.node p{font-size:19px;color:var(--mute);margin:6px 0 0;line-height:1.6}
+.wire{position:absolute;right:135px;left:135px;top:95px;height:4px;background:repeating-linear-gradient(90deg,#b8d9d4 0 12px,transparent 12px 22px);z-index:1}
+.pk{position:absolute;top:-8px;width:20px;height:20px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 6px rgba(245,181,68,.25),0 0 20px var(--gold)}
+.slide.on .pk{animation:travel 3.2s linear infinite}
+.pk.b{animation-delay:1.06s!important}.pk.c{animation-delay:2.13s!important}
+@keyframes travel{from{right:0}to{right:100%}}
+
+/* ---------- موبايل ---------- */
+.phone{width:330px;height:660px;border-radius:46px;background:#0d1b26;padding:14px;box-shadow:0 30px 70px rgba(0,0,0,.35),inset 0 0 0 2px #2b3c49;position:relative;flex:none}
+.phone .scr{width:100%;height:100%;border-radius:34px;overflow:hidden;background:#f3f6f9;position:relative;font-size:14px}
+.phone .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#0d1b26;border-radius:0 0 16px 16px;z-index:5}
+.ph-top{background:linear-gradient(120deg,#0b3b5c,#0f766e);color:#fff;padding:38px 16px 14px;display:flex;align-items:center;gap:10px}
+.ph-top .lg{width:34px;height:34px}
+.ph-top b{font-size:17px}.ph-top small{display:block;font-size:11px;opacity:.8}
+.ph-sum{display:flex;gap:6px;padding:10px 12px;background:#fff}
+.ph-sum div{flex:1;text-align:center;background:#f1f6f8;border-radius:10px;padding:5px 0;font-size:11px;color:#5f7186}
+.ph-sum b{display:block;font-size:19px;color:#0b3b5c}
+.ph-sum .a{background:#fdecec}.ph-sum .a b{color:var(--red)}
+.ph-row{display:flex;align-items:center;gap:8px;margin:6px 12px;background:#fff;border:1.5px solid #e2e8ef;border-radius:12px;padding:8px 10px;transition:.25s}
+.ph-row .n{width:26px;height:26px;border-radius:8px;background:#e6f6f4;color:#0f766e;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ph-row span{flex:1;min-width:0;font-weight:700;color:#0f2236;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-row em{font-style:normal;font-size:11px;background:#e8f7ee;color:#11803a;border-radius:10px;padding:2px 8px}
+.ph-row.abs{background:#fdecec;border-color:#f3b4b6}.ph-row.abs .n{background:var(--red);color:#fff}.ph-row.abs em{background:var(--red);color:#fff}
+.ph-btn{position:absolute;left:12px;right:12px;bottom:14px;background:#0f766e;color:#fff;border-radius:12px;text-align:center;padding:12px;font-weight:800;transition:.25s}
+.ph-btn.done{background:var(--green)}
+.tap{position:absolute;width:38px;height:38px;border-radius:50%;background:rgba(245,181,68,.55);border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:6;transition:top .6s cubic-bezier(.5,0,.3,1),left .6s cubic-bezier(.5,0,.3,1),transform .15s;pointer-events:none}
+.tap.press{transform:scale(.7)}
+.ph-toast{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(.6);background:var(--green);color:#fff;padding:14px 18px;border-radius:14px;font-weight:800;opacity:0;transition:.3s;white-space:nowrap;z-index:7;font-size:15px}
+.ph-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.ph-login{position:absolute;inset:0;background:#f3f6f9;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:10px;transition:opacity .4s;z-index:4}
+.ph-login .lg{width:70px;height:70px}
+.ph-login .f{width:100%;background:#fff;border:1.5px solid #e2e8ef;border-radius:10px;padding:10px;font-size:13px;color:#0f2236;direction:ltr;text-align:left;min-height:40px}
+.ph-login .go{width:100%;background:#0f766e;color:#fff;border-radius:10px;padding:10px;text-align:center;font-weight:800}
+
+.steps{display:flex;flex-direction:column;gap:18px;margin-top:30px}
+.step{display:flex;gap:18px;align-items:flex-start}
+.step .no{width:52px;height:52px;border-radius:16px;background:var(--teal2);color:#fff;font-family:Outfit,sans-serif;font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;flex:none}
+.step h3{font-size:27px;font-weight:800}
+.step p{font-size:20px;color:var(--mute);margin:4px 0 0;line-height:1.6}
+
+/* ---------- أوفلاين ---------- */
+.off-stage{display:flex;align-items:center;justify-content:center;gap:40px;margin-top:40px}
+.off-box{width:300px;height:300px;border-radius:40px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;position:relative}
+.off-box svg{width:90px;height:90px}
+.off-box b{font-size:26px}
+.off-box small{font-size:18px;color:#9cc5c1}
+.state-chip{font-size:18px;font-weight:800;padding:8px 18px;border-radius:30px;transition:.3s}
+.st-off{background:rgba(229,72,77,.2);color:#ffb3b5}.st-wait{background:rgba(245,181,68,.2);color:#ffd88a}.st-ok{background:rgba(22,163,74,.25);color:#9ff0bd}
+.arrow-run{width:220px;height:6px;border-radius:6px;background:rgba(255,255,255,.12);position:relative;overflow:hidden}
+.arrow-run i{position:absolute;top:0;bottom:0;width:60px;border-radius:6px;background:linear-gradient(90deg,transparent,var(--gold));right:-60px}
+.arrow-run.go i{animation:run 1s linear infinite}
+@keyframes run{to{right:100%}}
+
+/* ---------- لوحة الإدارة الصغيرة ---------- */
+.mini-dash{background:#fff;border-radius:24px;border:1px solid var(--line);box-shadow:0 24px 60px rgba(15,34,54,.12);overflow:hidden;width:760px;flex:none}
+.md-top{background:linear-gradient(120deg,#0b3b5c,#0f766e);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.md-top .lg{width:30px;height:30px}
+.md-k{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+.md-k div{border:1px solid var(--line);border-radius:14px;padding:10px;font-size:13px;color:var(--mute);position:relative;overflow:hidden}
+.md-k b{display:block;font-size:26px;color:#0b3b5c;font-family:Outfit,sans-serif}
+.md-k div::after{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--teal)}
+.md-k div:nth-child(2)::after{background:var(--red)}.md-k div:nth-child(3)::after{background:var(--gold)}.md-k div:nth-child(4)::after{background:#0b3b5c}
+.md-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.md-cls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.md-cls div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.md-cls div.no{background:#fffaf0;border-color:#f6d999}
+.md-cls em{font-style:normal;font-size:11px;padding:2px 8px;border-radius:10px;background:#e8f7ee;color:#11803a}
+.md-cls .no em{background:#fff6e3;color:#8a5a00}
+.md-chart{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;align-items:flex-end;gap:7px;height:170px}
+.md-chart i{flex:1;background:linear-gradient(180deg,var(--teal),var(--teal2));border-radius:5px 5px 2px 2px;transform-origin:bottom;transform:scaleY(0)}
+.slide.on .md-chart i{animation:barup 1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 70ms + 500ms)}
+.md-chart i.t{background:var(--red)}
+@keyframes barup{to{transform:scaleY(1)}}
+.feat{display:flex;flex-direction:column;gap:14px}
+.feat div{display:flex;gap:14px;align-items:center;font-size:23px;font-weight:700}
+.feat svg{width:30px;height:30px;color:var(--teal2);flex:none}
+
+/* ---------- التنبيهات ---------- */
+.alerts{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:40px}
+.al{border-radius:30px;padding:36px;position:relative;overflow:hidden}
+.al.y{background:linear-gradient(135deg,#fff6e3,#ffeccc);border:1px solid #f6d999}
+.al.r{background:linear-gradient(135deg,#fdecec,#fbd5d6);border:1px solid #f3b4b6}
+.al .num{font-family:Outfit,sans-serif;font-size:150px;font-weight:800;line-height:1}
+.al.y .num{color:#b07800}.al.r .num{color:var(--red)}
+.al .num small{font-size:40px;font-family:Cairo,sans-serif;font-weight:800;margin-inline-start:10px}
+.al h3{font-size:32px;font-weight:900;margin-top:10px}
+.al p{font-size:21px;line-height:1.7;color:#5a4a3a;margin:8px 0 0}
+.al .names{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.al .names span{background:#fff;border-radius:20px;padding:5px 14px;font-size:17px;font-weight:700}
+
+/* ---------- الشيتات ---------- */
+.files{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:36px}
+.file{background:#fff;border-radius:26px;border:1px solid var(--line);overflow:hidden;box-shadow:0 18px 40px rgba(15,34,54,.08)}
+.file-h{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.file-h .gs{width:46px;height:46px;border-radius:12px;background:#1f9d55;color:#fff;display:flex;align-items:center;justify-content:center}
+.file-h b{font-size:25px}.file-h small{display:block;color:var(--mute);font-size:16px}
+.tabs-row{display:flex;gap:6px;flex-wrap:wrap;padding:14px 20px 4px}
+.tabs-row span{font-size:15px;font-weight:700;padding:6px 12px;border-radius:8px;background:#f1f6f8;color:#0b3b5c}
+.tabs-row span.on{background:#0f766e;color:#fff}
+.mini-grid{margin:12px 20px 20px;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:15px}
+.mini-grid div{display:grid;grid-template-columns:70px 1fr repeat(5,46px);border-bottom:1px solid var(--line)}
+.mini-grid div:last-child{border:0}
+.mini-grid span{padding:7px 6px;text-align:center;border-inline-start:1px solid var(--line)}
+.mini-grid span:nth-child(2){text-align:right}
+.mini-grid .h span{background:#0f766e;color:#fff;font-weight:700;font-size:13px}
+.mini-grid .x{background:#fde2e2;color:#c62828;font-weight:800}
+
+/* ---------- الأمان ---------- */
+.sec-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;margin-top:30px;align-items:center}
+.sec-dia{position:relative;height:470px}
+.who{position:absolute;width:170px;padding:14px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);text-align:center;font-weight:800;font-size:20px}
+.who small{display:block;font-size:15px;color:#9cc5c1;font-weight:600}
+.gate{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:40px;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;box-shadow:0 0 0 12px rgba(20,184,166,.12),0 0 60px rgba(20,184,166,.4)}
+.gate svg{width:62px;height:62px}
+.gate::after{content:"";position:absolute;inset:-26px;border-radius:52px;border:2px dashed rgba(20,184,166,.5);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lane{position:absolute;height:3px;background:rgba(255,255,255,.18);transform-origin:right center}
+.lane i{position:absolute;top:-6px;width:15px;height:15px;border-radius:50%;background:var(--gold);right:0}
+.slide.on .lane i{animation:lane 2.4s ease-in-out infinite}
+@keyframes lane{0%{right:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{right:calc(100% - 15px);opacity:0}}
+.out{position:absolute;padding:10px 14px;border-radius:14px;font-size:17px;font-weight:800}
+.out.ok{background:rgba(22,163,74,.22);color:#a6f4c5}.out.no{background:rgba(229,72,77,.22);color:#ffc0c2}
+.chk{display:flex;flex-direction:column;gap:16px}
+.chk div{display:flex;gap:14px;align-items:flex-start;font-size:22px;line-height:1.55}
+.chk svg{width:30px;height:30px;color:var(--teal);flex:none;margin-top:3px}
+.chk b{color:#fff}
+
+/* ---------- التكلفة ---------- */
+.zero{font-family:Outfit,sans-serif;font-size:260px;font-weight:800;line-height:.9;background:linear-gradient(180deg,#fff,#9ff3e8);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- الأفكار ---------- */
+.idea-tag{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#3b2a00;font-weight:900;font-size:18px;padding:6px 16px;border-radius:30px;align-self:flex-start}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.flip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:36px}
+.flip{perspective:1200px;height:380px;cursor:pointer;border:0;background:none;padding:0;text-align:right}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,.8,.3,1);transform-style:preserve-3d}
+.flip.open .in{transform:rotateY(180deg)}
+.flip .fa,.flip .fb{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:26px;display:flex;flex-direction:column}
+.flip .fa{background:#fff;border:1px solid var(--line);box-shadow:0 14px 34px rgba(15,34,54,.08)}
+.flip .fb{background:#0b2a40;color:#eaf6f5;transform:rotateY(180deg);justify-content:center;gap:10px}
+.flip .fa h3{font-size:27px;font-weight:800;margin:16px 0 8px}
+.flip .fa p{font-size:19px;color:var(--mute);line-height:1.65;margin:0}
+.flip .hint{margin-top:auto;font-size:16px;color:var(--teal2);font-weight:800}
+
+/* ---------- الختام ---------- */
+#s-end{align-items:center;justify-content:center;text-align:center}
+.end-list{display:flex;gap:20px;margin:40px 0 10px}
+.end-list div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:18px 26px;font-size:22px;font-weight:800;color:#e6f7f5;display:flex;gap:10px;align-items:center}
+.end-list svg{width:26px;height:26px;color:var(--teal)}
+
+/* ---------- نوافذ الديمو ---------- */
+#modal{position:fixed;inset:0;z-index:100;background:rgba(3,14,22,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+#modal.show{display:flex;animation:fadein .25s}
+#mbox{background:#f3f6f9;border-radius:22px;box-shadow:0 40px 100px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;max-width:96vw;max-height:94vh;animation:pop .35s}
+#mhead{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#0b2a40;color:#fff}
+#mhead b{font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mhead a,#mhead button{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:10px;padding:7px 12px;font-size:14px;text-decoration:none;font-weight:700}
+#mbody{flex:1;min-height:0;overflow:auto;position:relative}
+#mbody iframe{border:0;display:block;width:100%;height:100%;background:#f3f6f9}
+.m-phone{width:420px;height:min(860px,86vh)}
+.m-desk{width:min(1280px,94vw);height:86vh}
+.m-panel{width:min(1100px,94vw);max-height:86vh}
+.demo-flag{position:absolute;top:10px;left:10px;background:var(--gold);color:#3b2a00;font-size:12px;font-weight:900;padding:3px 10px;border-radius:20px;z-index:3}
+
+/* ديمو الدرجات */
+.gd{padding:22px;font-size:16px}
+.gd-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.gd-top select{font:inherit;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff}
+.mtabs{display:flex;gap:6px;flex-wrap:wrap}
+.mtabs button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700}
+.mtabs button.on{background:#0f766e;color:#fff;border-color:#0f766e}
+.gd table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gd th{background:#0b3b5c;color:#fff;font-size:13px;padding:9px 6px;font-weight:700}
+.gd td{border-top:1px solid var(--line);padding:6px;text-align:center}
+.gd td:first-child{text-align:right;font-weight:700;padding-inline-start:12px;white-space:nowrap}
+.gd input,.gd td select{width:56px;font:inherit;text-align:center;padding:6px 2px;border:1.5px solid var(--line);border-radius:8px}
+.gd td select{width:96px}
+.gd input.bad{border-color:var(--red);background:#fdecec}
+.gd .tt{font-weight:900;color:#0b3b5c;font-family:Outfit,sans-serif;font-size:18px}
+.gd-foot{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.gd-msg{font-weight:800;color:var(--green)}
+.sheet-prev{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:none}
+.sheet-prev.show{display:block;animation:rise .4s}
+.sheet-prev .sh-h{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#e8f5ee;font-weight:800;color:#166534;font-size:14px}
+.sheet-prev table{border:0;border-radius:0}
+.sheet-prev th{background:#1f9d55}
+
+/* ديمو الشات */
+.chat{display:flex;flex-direction:column;height:min(720px,80vh);width:min(460px,92vw);background:#eef3f6}
+.ch-top{background:linear-gradient(120deg,#0b3b5c,#0f766e);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.ch-top .av{width:42px;height:42px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.ch-top .av svg{width:30px;height:30px}
+.ch-top b{display:block}.ch-top small{opacity:.8;font-size:12px}
+.ch-msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.65;animation:rise .3s;white-space:pre-line}
+.msg.bot{background:#fff;align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.msg.me{background:#0f766e;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.typing{display:flex;gap:4px;padding:14px}
+.typing i{width:8px;height:8px;border-radius:50%;background:#9fb1bf;animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.ch-quick{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid #dbe4ea;background:#fff}
+.ch-quick button{border:1.5px solid #bfe3de;background:#f0faf8;color:#0f766e;border-radius:20px;padding:7px 12px;font-size:13.5px;font-weight:700}
+
+/* ديمو الشيت */
+.sheet-demo{padding:18px}
+.sd-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.sd-tabs span{padding:6px 12px;background:#e9eef2;border-radius:8px 8px 0 0;font-size:13px;font-weight:700;color:#334}
+.sd-tabs span.on{background:#fff;color:#0f766e;box-shadow:0 -2px 0 #0f766e inset}
+.sd-grid{overflow:auto;background:#fff;border:1px solid var(--line);max-height:60vh}
+.sd-grid table{border-collapse:collapse;font-size:13px}
+.sd-grid td,.sd-grid th{border:1px solid #e3e8ee;padding:5px 8px;text-align:center;white-space:nowrap}
+.sd-grid th{background:#0f766e;color:#fff;position:sticky;top:0}
+.sd-grid td.nm{text-align:right;font-weight:700;background:#fff;position:sticky;right:0}
+.sd-grid td.x{background:#fde2e2;color:#c62828;font-weight:800}
+.sd-grid td.new{animation:flash 1s}
+@keyframes flash{from{background:#fff3c4}}
+.note-sd{font-size:14px;color:var(--mute);margin:10px 0 0}
+
+/* ملاحظات المتكلم */
+#notes{position:fixed;left:16px;right:16px;bottom:80px;z-index:90;background:rgba(7,28,44,.94);color:#e6f7f5;border-radius:16px;padding:16px 20px;font-size:17px;line-height:1.8;display:none;max-height:40vh;overflow:auto;border:1px solid rgba(255,255,255,.15)}
+#notes.show{display:block}
+#notes b{color:var(--gold)}
+#help{position:fixed;top:14px;left:14px;z-index:60;font-size:13px;color:#8fb3b0;background:rgba(0,0,0,.25);padding:6px 12px;border-radius:20px;transition:opacity 1s}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- 1 الغلاف -->
+<section class="slide dark" id="s-cover" data-notes="<b>افتتاح (٣٠ ثانية).</b> عرّف بنفسك وبالفكرة: إحنا بنستخدم التكنولوجيا عشان نساعد الناس اللي في المدرسة يركّزوا على شغلهم الحقيقي، مش على الورق.">
+ <div class="orb" style="width:420px;height:420px;background:radial-gradient(circle,#14b8a6,transparent 70%);top:-120px;right:-80px"></div>
+ <div class="orb" style="width:360px;height:360px;background:radial-gradient(circle,#f5b544,transparent 70%);bottom:-140px;left:-60px;animation-delay:-5s;opacity:.25"></div>
+ <div class="cover-logo rv pop" style="--i:0"><span class="ring"></span><span class="ring b"></span><div class="logo" data-logo></div></div>
+ <div class="cover-en rv" style="--i:2">Empowering Human Skills</div>
+ <div class="cover-ar rv" style="--i:3">راصد — نظام تسجيل الغياب الذكي</div>
+ <div class="cover-sch rv" style="--i:4">مدرسة الشهيد الرائد محمد سيد أبو شقرة</div>
+ <div class="pill rv" style="--i:6">Powered by <b>HINDAWY</b></div>
+ <div class="acts rv" style="--i:7;justify-content:center"><button class="act gold" data-go="next">يلا نبدأ ←</button></div>
+</section>
+
+<!-- 2 المقولة -->
+<section class="slide dark" id="s-quote" data-notes="<b>الفكرة الأساسية (٤٥ ثانية).</b> الهدف مش إننا نستبدل حد. الهدف إن الرائد والمدير ياخدوا وقتهم ومجهودهم من الورق ويرجّعوه للطلبة.">
+ <div class="q-mark rv fade" style="--i:0">“</div>
+ <div class="q-en rv" style="--i:1">Let technology carry the paperwork,<br>so people can do <b>what only people can.</b></div>
+ <div class="q-ar rv" style="--i:3">خلّي التكنولوجيا تشيل عنك الورق…<br>وإنت اعمل اللي محدش غيرك يقدر يعمله.</div>
+ <div class="q-by rv" style="--i:5">— HINDAWY</div>
+</section>
+
+<!-- 3 المشكلة -->
+<section class="slide light" id="s-problem" data-notes="<b>المشكلة (دقيقة ونص).</b> كلّم المدير عن اللي بيحصل كل يوم: كشوف ورق بتضيع، فصول ماسجلتش ومحدش بيعرف غير متأخر، ومفيش صورة كاملة للمدرسة في مكان واحد. واسأله: لو عايز تعرف مين غاب أكتر من ١٥ يوم النهارده… هتعرف إزاي؟">
+ <div class="papers">
+  <div class="ppr" style="--r:-12deg;right:40px;top:20px"><i></i><i></i><i></i><i></i><i></i><span class="x">×</span></div>
+  <div class="ppr" style="--r:9deg;right:220px;top:140px;animation-delay:-2s"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="ppr" style="--r:-4deg;right:80px;top:300px;animation-delay:-4s"><i></i><i></i><i></i><i></i><i></i><span class="x">?</span></div>
+ </div>
+ <div style="width:1000px;position:relative;z-index:2">
+  <div class="eyebrow rv" style="--i:0"><i></i>النهارده</div>
+  <h2 class="title rv" style="--i:1">الورق بيضيع… والصورة مش كاملة</h2>
+  <p class="lead rv" style="--i:2">الغياب بيتسجل في كشوف ورق، وكل كشف في مكان. عشان كده المتابعة صعبة، والمشكلة بتبان متأخر.</p>
+  <div class="cards" style="grid-template-columns:1fr 1fr;margin-top:30px">
+   <div class="card rv" style="--i:3"><div class="ic r" data-ico="paper"></div><h3>الورق بيضيع</h3><p>كشف واحد يتقطع أو يتنسي، فيوم غياب كامل يضيع.</p></div>
+   <div class="card rv" style="--i:4"><div class="ic g" data-ico="clock"></div><h3>مين ماسجلش؟</h3><p>مفيش طريقة تعرف بيها فورًا أنهي فصل سجّل وأنهي لأ.</p></div>
+   <div class="card rv" style="--i:5"><div class="ic b" data-ico="eye"></div><h3>مفيش رؤية كاملة</h3><p>عشان تعرف غياب الشهر لازم تجمع كشوف كتير بإيدك.</p></div>
+   <div class="card rv" style="--i:6"><div class="ic r" data-ico="warn"></div><h3>المنقطع بيتكشف متأخر</h3><p>الطالب اللي غاب ١٥ أو ٣٠ يوم مابيبانش غير بعد ما الوقت يفوت.</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- 4 الحل -->
+<section class="slide light" id="s-solution" data-notes="<b>الحل (دقيقة).</b> راصد عبارة عن صفحتين: صفحة للرائد على موبايله، وصفحة للإدارة. الداتا كلها بتتحفظ في Google Sheets على حساب المدرسة. دوس على «افتح تطبيق الرائد» عشان تعرض الشكل الحقيقي.">
+ <div class="eyebrow rv" style="--i:0"><i></i>الحل</div>
+ <h2 class="title rv" style="--i:1">راصد: الغياب من الموبايل للإدارة على طول</h2>
+ <p class="lead rv" style="--i:2">صفحتين بس: الرائد يسجّل من موبايله، والمدير يشوف كل حاجة لحظيًا. ومفيش ورق.</p>
+ <div class="cards pillars">
+  <div class="card rv" style="--i:3"><span class="big-n">01</span><div class="ic" data-ico="phone" style="margin-top:8px"></div><h3>الرائد يسجّل</h3><p>يدوس على اسم الطالب الغايب ويدوس «تسجيل». كده خلص.</p></div>
+  <div class="card rv" style="--i:4"><span class="big-n">02</span><div class="ic g" data-ico="sheet" style="margin-top:8px"></div><h3>بيتحفظ في جوجل</h3><p>كل يوم بيتحفظ في Google Sheets، ومينفعش يضيع أو يتقطع.</p></div>
+  <div class="card rv" style="--i:5"><span class="big-n">03</span><div class="ic b" data-ico="chart" style="margin-top:8px"></div><h3>المدير يشوف</h3><p>مين سجّل ومين لأ، والغياب يوم بيوم، والتنبيهات بدري.</p></div>
+ </div>
+ <div class="acts rv" style="--i:6"><button class="act" data-demo="raed">▶ افتح تطبيق الرائد</button><button class="act ghost" data-demo="admin">افتح لوحة الإدارة</button></div>
+</section>
+
+<!-- 5 إزاي بيشتغل -->
+<section class="slide light" id="s-flow" data-notes="<b>إزاي بيشتغل (دقيقة).</b> امشي مع النقط اللي بتتحرك: الرائد بيسجّل، راصد بيتأكد إنه مسموح له، يحفظ في الشيت، والإدارة تشوف على طول. أي تعديل في أسماء الطلاب في الشيت بيظهر في التطبيق لوحده.">
+ <div class="eyebrow rv" style="--i:0"><i></i>الفكرة ببساطة</div>
+ <h2 class="title rv" style="--i:1">الداتا ماشية في خط واحد</h2>
+ <div class="flow rv fade" style="--i:2">
+  <div class="wire"><span class="pk"></span><span class="pk b"></span><span class="pk c"></span></div>
+  <div class="node"><div class="bx" data-ico="phone"></div><h3>الرائد</h3><p>يسجّل الغياب<br>من موبايله</p></div>
+  <div class="node"><div class="bx" data-ico="shield"></div><h3>راصد</h3><p>يتأكد من الحساب<br>والفصل</p></div>
+  <div class="node"><div class="bx" style="color:#1f9d55" data-ico="sheet"></div><h3>Google Sheets</h3><p>ملف للطلاب<br>وملف للغياب</p></div>
+  <div class="node"><div class="bx" style="color:#2563eb" data-ico="chart"></div><h3>الإدارة</h3><p>لوحة لحظية<br>وتقارير</p></div>
+ </div>
+ <div class="grow"></div>
+ <div class="acts rv" style="--i:4"><button class="act" data-demo="raed">▶ جرّب التسجيل</button><button class="act ghost" data-demo="sheet">شوف شكل الشيت</button></div>
+</section>
+
+<!-- 6 الرائد -->
+<section class="slide light" id="s-raed" data-notes="<b>تجربة الرائد (دقيقتين).</b> سيب الأنيميشن يشتغل وإنت بتشرح الخطوات الأربعة. بعدين دوس «جرّبها مباشر» وادخل بـ raed1 / 1111 (البيانات ملياها لوحدها). علّم طالبين غايبين ودوس تسجيل. نقطة مهمة: الرائد مش شايف غير فصله.">
+ <div style="display:flex;gap:70px;align-items:center;height:100%">
+  <div class="rv pop" style="--i:1"><div class="phone" id="ph"></div></div>
+  <div style="flex:1">
+   <div class="eyebrow rv" style="--i:0"><i></i>تجربة الرائد</div>
+   <h2 class="title rv" style="--i:1">دوسة على اسم الغايب… وخلاص</h2>
+   <div class="steps">
+    <div class="step rv" style="--i:2"><span class="no">1</span><div><h3>يدخل بحسابه</h3><p>اسم مستخدم وكلمة سر خاصين بيه.</p></div></div>
+    <div class="step rv" style="--i:3"><span class="no">2</span><div><h3>يشوف فصله بس</h3><p>قايمة فصله بس بتظهر، ومش بيشوف أي فصل تاني.</p></div></div>
+    <div class="step rv" style="--i:4"><span class="no">3</span><div><h3>يدوس على الغايب</h3><p>الاسم يقلب أحمر، والعدّاد يتحدّث لوحده.</p></div></div>
+    <div class="step rv" style="--i:5"><span class="no">4</span><div><h3>«تسجيل الغياب»</h3><p>يتحفظ في الشيت، والإدارة تشوفه على طول.</p></div></div>
+   </div>
+   <div class="acts rv" style="--i:6"><button class="act" data-demo="raed">▶ جرّبها مباشر</button><button class="act ghost" data-demo="raed-login">شاشة الدخول</button></div>
+  </div>
+ </div>
+</section>
+
+<!-- 7 من غير نت -->
+<section class="slide dark" id="s-offline" data-notes="<b>من غير نت (دقيقة).</b> لو الشبكة في المدرسة ضعيفة أو فاصلة، الرائد بيسجّل عادي. الغياب بيتحفظ على موبايله ويظهر «في انتظار الإرسال»، وأول ما النت يرجع بيتبعت لوحده، من غير ما حد يعمل حاجة.">
+ <div class="eyebrow rv" style="--i:0"><i></i>من غير نت</div>
+ <h2 class="title rv" style="--i:1">النت فصل؟ الغياب مش هيضيع</h2>
+ <p class="lead rv" style="--i:2">بيتحفظ على موبايل الرائد، وأول ما النت يرجع بيتبعت لوحده.</p>
+ <div class="off-stage rv fade" style="--i:3">
+  <div class="off-box"><div data-ico="phone" style="color:#9ff3e8"></div><b>موبايل الرائد</b><span class="state-chip st-off" id="offA">مفيش نت</span></div>
+  <div class="arrow-run" id="offRun"><i></i></div>
+  <div class="off-box"><div data-ico="sheet" style="color:#86efac"></div><b>Google Sheets</b><span class="state-chip st-wait" id="offB">مستني…</span></div>
+ </div>
+ <div class="grow"></div>
+ <div class="acts rv" style="--i:4"><button class="act" data-demo="raed">▶ جرّب في التطبيق</button></div>
+</section>
+
+<!-- 8 الإدارة -->
+<section class="slide light" id="s-admin" data-notes="<b>لوحة الإدارة (دقيقتين).</b> دوس «افتح لوحة الإدارة» وادخل بـ admin / 9999. وريه: الفصول اللي سجّلت (أخضر) واللي ماسجلتش (أصفر)، نسبة الحضور، رسم الغياب اليومي. ادخل على فصل وافتح «الجدول الشهري»، ودوس على أي اسم عشان يتفتح ملف الطالب.">
+ <div class="eyebrow rv" style="--i:0"><i></i>لوحة الإدارة</div>
+ <h2 class="title rv" style="--i:1">المدير شايف المدرسة كلها في صفحة واحدة</h2>
+ <div style="display:flex;gap:56px;align-items:center;margin-top:30px">
+  <div class="mini-dash rv pop" style="--i:2">
+   <div class="md-top"><span class="lg" data-logo></span>لوحة الإدارة — اليوم</div>
+   <div class="md-k"><div><b class="cnt" data-to="89" data-suf="%">0</b>نسبة الحضور</div><div><b class="cnt" data-to="22">0</b>الغائبون</div><div><b>5 / 7</b>فصول سجّلت</div><div><b class="cnt" data-to="5">0</b>غياب +30 يوم</div></div>
+   <div class="md-body">
+    <div class="md-cls"><div>أولى أول<em>✓ سجّل</em></div><div>أولى ثاني<em>✓ سجّل</em></div><div>أولى ثالث<em>✓ سجّل</em></div><div>أولى رابع<em>✓ سجّل</em></div><div>أولى خامس<em>✓ سجّل</em></div><div class="no">أولى سادس<em>لم يسجّل</em></div><div class="no">أولى سابع<em>لم يسجّل</em></div></div>
+    <div class="md-chart" id="mdc"></div>
+   </div>
+  </div>
+  <div class="feat">
+   <div class="rv" style="--i:3"><span data-ico="check"></span>مين سجّل ومين لأ، لحظة بلحظة</div>
+   <div class="rv" style="--i:4"><span data-ico="check"></span>نسبة الحضور ورسم الغياب اليومي</div>
+   <div class="rv" style="--i:5"><span data-ico="check"></span>سجل كل فصل يوم بيوم من أول الشهر</div>
+   <div class="rv" style="--i:6"><span data-ico="check"></span>ملف لكل طالب بأيام غيابه</div>
+   <div class="rv" style="--i:7"><span data-ico="check"></span>تنزيل أي جدول Excel</div>
+  </div>
+ </div>
+ <div class="grow"></div>
+ <div class="acts rv" style="--i:8"><button class="act" data-demo="admin">▶ افتح لوحة الإدارة</button></div>
+</section>
+
+<!-- 9 التنبيهات -->
+<section class="slide light" id="s-alerts" data-notes="<b>التنبيه بدري (دقيقة).</b> النظام بيعد غياب كل طالب لوحده من بداية الترم. اللي يوصل ١٥ يوم يظهر في قايمة فصله، واللي يعدّي ٣٠ يوم يظهر في قايمة المنقطعين في الصفحة الرئيسية. الأرقام دي بتتغير من الإعدادات.">
+ <div class="eyebrow rv" style="--i:0"><i></i>التنبيهات</div>
+ <h2 class="title rv" style="--i:1">نعرف الطالب المعرّض للانقطاع قبل ما يفوت الوقت</h2>
+ <div class="alerts">
+  <div class="al y rv pop" style="--i:2"><div class="num"><span class="cnt" data-to="15">0</span><small>يوم</small></div><h3>قايمة في كل فصل</h3><p>أي طالب يوصل ١٥ يوم غياب من بداية الترم بيظهر في قايمة تنبيه جوه فصله.</p><div class="names"><span>خالد محمد الجمال</span><span>حمزة أحمد قنديل</span></div></div>
+  <div class="al r rv pop" style="--i:3"><div class="num"><span class="cnt" data-to="30">0</span><small>يوم+</small></div><h3>قايمة المنقطعين</h3><p>اللي يعدّي ٣٠ يوم بيظهر في الصفحة الرئيسية للمدير، من كل الفصول في مكان واحد.</p><div class="names"><span>مازن حسن المصري</span><span>أولى أول</span></div></div>
+ </div>
+ <p class="lead rv" style="--i:4;font-size:20px">* الأسماء اللي فوق من البيانات التجريبية.</p>
+ <div class="grow"></div>
+ <div class="acts rv" style="--i:5"><button class="act" data-demo="admin">▶ شوف القوايم في اللوحة</button></div>
+</section>
+
+<!-- 10 تقني: الشيتات -->
+<section class="slide light" id="s-sheets" data-notes="<b>تقني: فين الداتا؟ (دقيقة ونص).</b> ملفين منفصلين على Google Drive بتاع المدرسة: ملف للطلاب والحسابات، وملف للغياب فيه جدول لكل فصل. الداتا بتاعتنا إحنا، وتقدر تفتحها في أي وقت وتنزّلها Excel. دوس «شوف جدول الغياب» عشان تشوف إزاي العمود بيتملي لما الرائد يسجّل.">
+ <div class="eyebrow rv" style="--i:0"><i></i>تقنيًا — الحفظ</div>
+ <h2 class="title rv" style="--i:1">كل حاجة محفوظة في Google Sheets</h2>
+ <div class="files">
+  <div class="file rv" style="--i:2">
+   <div class="file-h"><span class="gs" data-ico="sheet"></span><div><b>راصد - الطلاب</b><small>الأسماء والحسابات والفصول</small></div></div>
+   <div class="tabs-row"><span>المستخدمين</span><span>الفصول</span><span class="on">أولى أول</span><span>أولى ثاني</span><span>…</span></div>
+   <div class="mini-grid"><div class="h" style="grid-template-columns:90px 1fr"><span>الكود</span><span>الاسم</span></div><div style="grid-template-columns:90px 1fr"><span>1001</span><span>يوسف خالد زكي</span></div><div style="grid-template-columns:90px 1fr"><span>1002</span><span>كريم أحمد الدسوقي</span></div><div style="grid-template-columns:90px 1fr"><span>1003</span><span>إسلام مصطفى فرج</span></div></div>
+  </div>
+  <div class="file rv" style="--i:3">
+   <div class="file-h"><span class="gs" data-ico="sheet"></span><div><b>راصد - الغياب</b><small>جدول لكل فصل: طلاب × أيام</small></div></div>
+   <div class="tabs-row"><span class="on">غياب أولى أول</span><span>غياب أولى ثاني</span><span>…</span></div>
+   <div class="mini-grid"><div class="h"><span>الكود</span><span>الاسم</span><span>١٢</span><span>١٣</span><span>١٤</span><span>١٥</span><span>١٨</span></div>
+    <div><span>1001</span><span>يوسف خالد زكي</span><span>ح</span><span>ح</span><span class="x">غ</span><span>ح</span><span>ح</span></div>
+    <div><span>1002</span><span>كريم أحمد</span><span>ح</span><span>ح</span><span>ح</span><span>ح</span><span>ح</span></div>
+    <div><span>1004</span><span>خالد محمد</span><span class="x">غ</span><span>ح</span><span class="x">غ</span><span class="x">غ</span><span>ح</span></div></div>
+  </div>
+ </div>
+ <div class="grow"></div>
+ <div class="acts rv" style="--i:4"><button class="act" data-demo="sheet">▶ شوف جدول الغياب وهو بيتملي</button><button class="act ghost" data-demo="students">ملف الطلاب</button></div>
+</section>
+
+<!-- 11 تقني: الأمان -->
+<section class="slide dark" id="s-security" data-notes="<b>تقني: الخصوصية (دقيقة ونص).</b> نقطة مهمة للمدير: كل رائد مش بيوصله أصلًا غير بيانات فصله. السيرفر هو اللي بيفلتر قبل ما يبعت أي حاجة، فحتى لو حد حاول، مش هيلاقي غير فصله. والشيتات نفسها مش متشاركة مع حد. ٥ محاولات غلط في كلمة السر بتقفل الحساب ١٥ دقيقة.">
+ <div class="eyebrow rv" style="--i:0"><i></i>تقنيًا — الخصوصية</div>
+ <h2 class="title rv" style="--i:1">كل واحد يشوف اللي يخصه بس</h2>
+ <div class="sec-wrap">
+  <div class="sec-dia rv fade" style="--i:2">
+   <div class="who" style="right:0;top:40px">رائد أولى أول<small>raed1</small></div>
+   <div class="who" style="right:0;top:190px">رائد أولى سابع<small>raed7</small></div>
+   <div class="who" style="right:0;top:340px">المدير<small>admin</small></div>
+   <div class="lane" style="right:170px;top:78px;width:120px;transform:rotate(-24deg)"><i></i></div>
+   <div class="lane" style="right:170px;top:228px;width:110px"><i style="animation-delay:.6s"></i></div>
+   <div class="lane" style="right:170px;top:378px;width:120px;transform:rotate(24deg)"><i style="animation-delay:1.2s"></i></div>
+   <div class="gate"><span data-ico="shield"></span>راصد</div>
+   <div class="out ok" style="left:0;top:50px">فصل أولى أول بس</div>
+   <div class="out ok" style="left:0;top:200px">فصل أولى سابع بس</div>
+   <div class="out ok" style="left:0;top:350px">كل الفصول</div>
+   <div class="out no" style="left:40px;top:118px;font-size:15px">✗ فصل تاني = مرفوض</div>
+  </div>
+  <div class="chk">
+   <div class="rv" style="--i:3"><span data-ico="lock"></span><span><b>حساب لكل رائد</b> باسم مستخدم وكلمة سر، وتتغير من الشيت في ثانية.</span></div>
+   <div class="rv" style="--i:4"><span data-ico="shield"></span><span><b>السيرفر بيفلتر قبل ما يبعت:</b> الرائد مابيوصلوش غير بيانات فصله.</span></div>
+   <div class="rv" style="--i:5"><span data-ico="check"></span><span><b>مايقدرش يسجّل لفصل غيره،</b> ولا ليوم لسه مجاش.</span></div>
+   <div class="rv" style="--i:6"><span data-ico="warn"></span><span><b>٥ محاولات غلط</b> بتقفل الحساب ١٥ دقيقة.</span></div>
+   <div class="rv" style="--i:7"><span data-ico="sheet"></span><span><b>الشيتات خاصة</b> على حساب المدرسة، ومش متشاركة مع حد.</span></div>
+  </div>
+ </div>
+ <div class="acts rv" style="--i:8"><button class="act" data-demo="raed3">▶ ادخل كرائد وشوف بنفسك</button></div>
+</section>
+
+<!-- 12 التكلفة -->
+<section class="slide gold" id="s-cost" data-notes="<b>التكلفة (٣٠ ثانية).</b> مفيش اشتراكات ومفيش أجهزة جديدة. Google Sheets و GitHub Pages مجانيين بالحجم ده، والرواد بيستخدموا موبايلاتهم.">
+ <div style="display:flex;align-items:center;gap:80px;height:100%">
+  <div class="zero rv pop" style="--i:0">0</div>
+  <div>
+   <div class="eyebrow rv" style="--i:1;color:#ffe2a3"><i></i>التكلفة</div>
+   <h2 class="title rv" style="--i:2;color:#fff">مفيش تكلفة تشغيل</h2>
+   <div class="chk" style="margin-top:26px">
+    <div class="rv" style="--i:3"><span data-ico="check" style="color:#ffe2a3"></span><span>Google Sheets مجاني بالحجم ده</span></div>
+    <div class="rv" style="--i:4"><span data-ico="check" style="color:#ffe2a3"></span><span>الموقع على GitHub Pages مجاني</span></div>
+    <div class="rv" style="--i:5"><span data-ico="check" style="color:#ffe2a3"></span><span>شغال على موبايلات الرواد، ومفيش أجهزة جديدة</span></div>
+    <div class="rv" style="--i:6"><span data-ico="check" style="color:#ffe2a3"></span><span>مفيش برامج تتسطّب، رابط واحد بس</span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- 13 فاصل الأفكار -->
+<section class="slide dark" id="s-next" style="justify-content:center;align-items:center;text-align:center" data-notes="<b>انتقال (١٥ ثانية).</b> ده اللي شغال النهارده. دلوقتي هوريك إحنا ممكن نكبّره لحد فين.">
+ <div class="ic rv pop" style="--i:0;width:110px;height:110px;border-radius:32px" data-ico="bulb"></div>
+ <h2 class="title rv" style="--i:1;font-size:76px;margin-top:26px">الخطوة الجاية</h2>
+ <p class="lead rv" style="--i:2;text-align:center">نفس الفكرة، ونفس الشيتات، وخدمات أكتر للمدرسين والطلبة وأولياء الأمور.</p>
+</section>
+
+<!-- 14 فكرة: درجات المدرسين -->
+<section class="slide light" id="s-grades" data-notes="<b>فكرة ١: درجات المدرسين (دقيقة ونص).</b> كل مدرس يدخل بحسابه، ويختار الفصل والشهر، ويكتب التقييمات الأربعة وامتحان الشهر والسلوك. كل شهر ليه شيت لوحده. دوس «شوف الديمو» واكتب درجة، والمجموع هيتحسب لوحده، وبعدين دوس حفظ.">
+ <div class="two" style="height:100%">
+  <div>
+   <span class="idea-tag rv" style="--i:0">💡 فكرة ١</span>
+   <h2 class="title rv" style="--i:1">درجات المدرسين: شيت لكل شهر</h2>
+   <p class="lead rv" style="--i:2">كل مدرس يسجّل درجات مادته بس: التقييمات وامتحان الشهر والسلوك، والمجموع يتحسب لوحده.</p>
+   <div class="chk" style="margin-top:24px;color:var(--ink)">
+    <div class="rv" style="--i:3"><span data-ico="check" style="color:var(--teal2)"></span><span>٤ تقييمات (كل واحد من ٥) + امتحان الشهر من ٢٥</span></div>
+    <div class="rv" style="--i:4"><span data-ico="check" style="color:var(--teal2)"></span><span>شيت لكل شهر: «درجات أكتوبر»، «درجات نوفمبر»…</span></div>
+    <div class="rv" style="--i:5"><span data-ico="check" style="color:var(--teal2)"></span><span>المدير وولي الأمر يشوفوا المستوى شهر بشهر</span></div>
+   </div>
+   <div class="acts rv" style="--i:6"><button class="act gold" data-demo="grades">▶ شوف الديمو</button></div>
+  </div>
+  <div class="rv pop" style="--i:3;display:flex;justify-content:center">
+   <div class="file" style="width:640px">
+    <div class="file-h"><span class="gs" data-ico="sheet"></span><div><b>درجات أكتوبر — اللغة العربية</b><small>أولى أول</small></div></div>
+    <div class="mini-grid" style="font-size:14px"><div class="h" style="grid-template-columns:1.6fr repeat(6,1fr)"><span>الاسم</span><span>ت١</span><span>ت٢</span><span>ت٣</span><span>ت٤</span><span>امتحان</span><span>المجموع</span></div>
+     <div style="grid-template-columns:1.6fr repeat(6,1fr)"><span>يوسف خالد</span><span>5</span><span>4</span><span>5</span><span>5</span><span>23</span><span><b>42</b></span></div>
+     <div style="grid-template-columns:1.6fr repeat(6,1fr)"><span>كريم أحمد</span><span>4</span><span>4</span><span>3</span><span>5</span><span>19</span><span><b>35</b></span></div>
+     <div style="grid-template-columns:1.6fr repeat(6,1fr)"><span>إسلام مصطفى</span><span>5</span><span>5</span><span>5</span><span>4</span><span>24</span><span><b>43</b></span></div></div>
+    <div class="tabs-row" style="padding-bottom:16px"><span>سبتمبر</span><span class="on">أكتوبر</span><span>نوفمبر</span><span>ديسمبر</span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- 15 فكرة: شات بوت -->
+<section class="slide light" id="s-bot" data-notes="<b>فكرة ٢: شات بوت المدرسة (دقيقة ونص).</b> الطالب أو ولي الأمر يكتب سؤاله: غبت كام يوم؟ درجاتي إيه؟ الامتحانات إمتى؟ والبوت يرد من نفس الشيتات، وكل واحد يشوف بياناته هو بس. دوس «كلّم البوت» وجرّب الأسئلة الجاهزة.">
+ <div class="two" style="height:100%">
+  <div>
+   <span class="idea-tag rv" style="--i:0">💡 فكرة ٢</span>
+   <h2 class="title rv" style="--i:1">شات بوت المدرسة</h2>
+   <p class="lead rv" style="--i:2">الطالب أو ولي الأمر يسأل، والبوت يرد على طول من بيانات المدرسة. كل واحد بيشوف بياناته هو بس.</p>
+   <div class="cards" style="grid-template-columns:1fr 1fr;margin-top:24px">
+    <div class="card rv" style="--i:3;padding:20px"><h3 style="margin:0;font-size:23px">«غبت كام يوم؟»</h3><p>من شيت الغياب</p></div>
+    <div class="card rv" style="--i:4;padding:20px"><h3 style="margin:0;font-size:23px">«درجاتي إيه؟»</h3><p>من شيت الدرجات</p></div>
+    <div class="card rv" style="--i:5;padding:20px"><h3 style="margin:0;font-size:23px">«الامتحانات إمتى؟»</h3><p>من جدول المدرسة</p></div>
+    <div class="card rv" style="--i:6;padding:20px"><h3 style="margin:0;font-size:23px">«مين رائد فصلي؟»</h3><p>من بيانات الفصول</p></div>
+   </div>
+   <div class="acts rv" style="--i:7"><button class="act gold" data-demo="chat">▶ كلّم البوت</button></div>
+  </div>
+  <div class="rv pop" style="--i:3;display:flex;justify-content:center">
+   <div class="phone" style="width:300px;height:600px"><div class="notch"></div><div class="scr" id="botPrev"></div></div>
+  </div>
+ </div>
+</section>
+
+<!-- 16 أفكار أكتر -->
+<section class="slide light" id="s-more" data-notes="<b>أفكار أكتر (دقيقة).</b> دوس على كل كارت عشان يتقلب ويوريك شكل الفكرة: رسالة لولي الأمر لما ابنه يغيب، تقرير شهري جاهز للمدير، تسجيل حضور بـ QR، وإعلانات وجدول حصص.">
+ <div class="eyebrow rv" style="--i:0"><i></i>أفكار كمان</div>
+ <h2 class="title rv" style="--i:1">اضغط على أي فكرة عشان تشوف شكلها</h2>
+ <div class="flip-grid">
+  <button class="flip rv" style="--i:2"><div class="in"><div class="fa"><div class="ic" data-ico="chat"></div><h3>رسالة لولي الأمر</h3><p>أول ما الرائد يسجّل الطالب غايب، ولي الأمر توصله رسالة.</p><span class="hint">اضغط ↺</span></div>
+   <div class="fb"><div style="background:#dcf8c6;color:#14321d;border-radius:14px 14px 14px 4px;padding:14px;font-size:17px;line-height:1.7">📢 مدرسة أبو شقرة:<br>نحيطكم علمًا بغياب الطالب <b>يوسف خالد</b> اليوم الأحد ١٨ أكتوبر.</div><small style="color:#9cc5c1">مثال توضيحي</small></div></div></button>
+  <button class="flip rv" style="--i:3"><div class="in"><div class="fa"><div class="ic b" data-ico="chart"></div><h3>تقرير شهري</h3><p>آخر كل شهر يجهز تقرير PDF للمدير لكل فصل بنسب الحضور.</p><span class="hint">اضغط ↺</span></div>
+   <div class="fb"><b style="font-size:20px">تقرير أكتوبر</b><div style="display:flex;align-items:flex-end;gap:8px;height:120px;margin:8px 0"><i style="flex:1;height:90%;background:#14b8a6;border-radius:4px"></i><i style="flex:1;height:75%;background:#14b8a6;border-radius:4px"></i><i style="flex:1;height:95%;background:#14b8a6;border-radius:4px"></i><i style="flex:1;height:60%;background:#f5b544;border-radius:4px"></i><i style="flex:1;height:85%;background:#14b8a6;border-radius:4px"></i></div><small style="color:#9cc5c1">نسبة الحضور لكل فصل — مثال</small></div></div></button>
+  <button class="flip rv" style="--i:4"><div class="in"><div class="fa"><div class="ic g" data-ico="qr"></div><h3>حضور بـ QR</h3><p>الطالب يعمل مسح لكود الفصل من موبايله، والحضور يتسجل لوحده.</p><span class="hint">اضغط ↺</span></div>
+   <div class="fb" style="align-items:center"><div data-ico="qrbig" style="width:150px;height:150px;background:#fff;border-radius:14px;padding:10px;color:#0b2a40"></div><small style="color:#9cc5c1">امسح عشان تسجّل حضورك — مثال</small></div></div></button>
+  <button class="flip rv" style="--i:5"><div class="in"><div class="fa"><div class="ic r" data-ico="bell"></div><h3>إعلانات وجدول</h3><p>جدول الحصص والإعلانات والامتحانات في مكان واحد للطلبة.</p><span class="hint">اضغط ↺</span></div>
+   <div class="fb"><div style="background:rgba(255,255,255,.08);border-radius:12px;padding:12px;font-size:16px;line-height:1.8">🗓 الأحد: عربي · رياضة · علوم<br>📣 امتحان شهر أكتوبر: [التاريخ]<br>🏆 مسابقة القراءة: [التاريخ]</div><small style="color:#9cc5c1">مثال توضيحي</small></div></div></button>
+ </div>
+</section>
+
+<!-- 17 الختام -->
+<section class="slide dark" id="s-end" data-notes="<b>الختام (٣٠ ثانية).</b> لخّص في جملة: من ورق بيضيع لنظام بيحفظ كل يوم وبيوري الصورة كاملة، ومن غير تكلفة. اطلب الموافقة إننا نجربه على فصول المدرسة الحقيقية.">
+ <div class="orb" style="width:460px;height:460px;background:radial-gradient(circle,#14b8a6,transparent 70%);top:-150px;left:-100px"></div>
+ <div class="cover-logo rv pop" style="--i:0;width:120px;height:120px"><span class="ring"></span><div class="logo" data-logo></div></div>
+ <div class="cover-en rv" style="--i:1;font-size:84px">Empowering Human Skills</div>
+ <div class="end-list">
+  <div class="rv" style="--i:2"><span data-ico="check"></span>مفيش ورق بيضيع</div>
+  <div class="rv" style="--i:3"><span data-ico="check"></span>الصورة كاملة لحظيًا</div>
+  <div class="rv" style="--i:4"><span data-ico="check"></span>تنبيه بدري للانقطاع</div>
+  <div class="rv" style="--i:5"><span data-ico="check"></span>من غير تكلفة</div>
+ </div>
+ <div class="cover-ar rv" style="--i:6;font-size:52px">شكرًا</div>
+ <div class="acts rv" style="--i:7;justify-content:center"><button class="act" data-demo="raed">▶ تطبيق الرائد</button><button class="act ghost" data-demo="admin">لوحة الإدارة</button></div>
+ <div class="pill rv" style="--i:8">Powered by <b>HINDAWY</b></div>
+</section>
+
+<div id="hud" class="hud-dark">
+ <span id="brand"><span style="width:26px;height:26px;display:inline-block" data-logo></span>راصد · <b>HINDAWY</b></span>
+ <span class="sp"></span>
+ <button class="navb" id="bNotes" title="ملاحظات المتكلم (N)" aria-label="ملاحظات المتكلم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/></svg></button>
+ <button class="navb" id="bFull" title="ملء الشاشة (F)" aria-label="ملء الشاشة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+ <button class="navb" id="bPrev" aria-label="السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></button>
+ <span id="count"></span>
+ <button class="navb" id="bNext" aria-label="التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></button>
+</div>
+<div id="bar"><i></i></div>
+</div></div>
+
+<div id="modal" role="dialog" aria-modal="true"><div id="mbox"><div id="mhead"><b id="mtitle"></b><a id="mopen" target="_blank" rel="noopener">فتح في تاب جديد ↗</a><button id="mclose">إغلاق ✕</button></div><div id="mbody"></div></div></div>
+<div id="notes"></div>
+<div id="help">← → للتنقّل · F شاشة كاملة · N ملاحظات</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return(r||document).querySelector(s)},$$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+
+/* ---------- أيقونات ---------- */
+var P={
+ paper:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/>',
+ sheet:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0012 3z"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>',
+ qr:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 20h2M20 14v2"/>',
+ bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 21h4"/>',
+ bot:'<rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 3v4M9 13h.01M15 13h.01M9 16h6"/>'
+};
+function ico(n){return'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+P[n]+'</svg>'}
+function qrBig(){var s='<svg viewBox="0 0 29 29" width="100%" height="100%" shape-rendering="crispEdges">',seed=7;function r(){seed=(seed*9301+49297)%233280;return seed/233280}
+ function eye(x,y){s+='<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="currentColor"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" fill="currentColor"/>'}
+ for(var y=0;y<29;y++)for(var x=0;x<29;x++){if((x<8&&y<8)||(x>20&&y<8)||(x<8&&y>20))continue;if(r()<.48)s+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="currentColor"/>'}
+ eye(0,0);eye(22,0);eye(0,22);return s+'</svg>'}
+$$("[data-ico]").forEach(function(e){var n=e.getAttribute("data-ico");e.innerHTML=n==="qrbig"?qrBig():ico(n)});
+var lgN=0;function logo(){var id="lg"+(++lgN);return'<svg viewBox="0 0 64 64"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset=".55" stop-color="#0f766e"/><stop offset="1" stop-color="#0b3b5c"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#'+id+')"/><rect x="16" y="14" width="32" height="38" rx="7" fill="#fff"/><rect x="25" y="9.5" width="14" height="9" rx="3.5" fill="#f5b544"/><path d="M23.5 33.5l6 6 11-12.5" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="47" cy="47" r="7" fill="#f5b544" stroke="#fff" stroke-width="2.5"/></svg>'}
+$$("[data-logo]").forEach(function(e){e.innerHTML=logo()});
+
+/* ---------- المسرح ---------- */
+var stage=$("#stage");
+function fit(){var s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform="scale("+s+")"}
+addEventListener("resize",fit);fit();
+
+var slides=$$(".slide"),cur=0,timers=[];
+function clearT(){timers.forEach(function(t){clearTimeout(t);clearInterval(t)});timers=[]}
+function T(fn,ms){var t=setTimeout(fn,ms);timers.push(t);return t}
+function go(n){
+ if(n<0||n>=slides.length)return;
+ slides[cur].classList.remove("on");cur=n;
+ var s=slides[cur];
+ s.querySelectorAll(".rv").forEach(function(e){e.style.animation="none";void e.offsetWidth;e.style.animation=""});
+ s.classList.add("on");
+ $("#count").textContent=(cur+1)+" / "+slides.length;
+ $("#bar i").style.width=((cur+1)/slides.length*100)+"%";
+ $("#hud").className=s.classList.contains("light")?"hud-light":"hud-dark";
+ $("#notes").innerHTML=s.getAttribute("data-notes")||"";
+ try{history.replaceState(null,"","#"+(cur+1))}catch(e){}
+ clearT();enter(s.id);
+}
+function next(){go(cur+1)}function prev(){go(cur-1)}
+$("#bNext").onclick=next;$("#bPrev").onclick=prev;
+document.addEventListener("keydown",function(e){
+ if($("#modal").classList.contains("show")){if(e.key==="Escape")closeM();return}
+ if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;
+ if(["ArrowLeft","PageDown"," ","Enter"].indexOf(e.key)>-1){e.preventDefault();next()}
+ else if(["ArrowRight","PageUp","Backspace"].indexOf(e.key)>-1){e.preventDefault();prev()}
+ else if(e.key==="Home")go(0);else if(e.key==="End")go(slides.length-1);
+ else if(e.key==="f"||e.key==="F")full();else if(e.key==="n"||e.key==="N")$("#notes").classList.toggle("show");
+});
+var tx=null;addEventListener("touchstart",function(e){tx=e.touches[0].clientX},{passive:true});
+addEventListener("touchend",function(e){if(tx===null||$("#modal").classList.contains("show"))return;var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)(d>0?next:prev)();tx=null});
+function full(){var d=document.documentElement;if(!document.fullscreenElement){(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}else document.exitFullscreen()}
+$("#bFull").onclick=full;$("#bNotes").onclick=function(){$("#notes").classList.toggle("show")};
+setTimeout(function(){$("#help").style.opacity=0},6000);
+document.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)next();var d=e.target.closest("[data-demo]");if(d)demo(d.getAttribute("data-demo"));var f=e.target.closest(".flip");if(f)f.classList.toggle("open")});
+
+/* ---------- حركات كل شريحة ---------- */
+function countUp(root){$$(".cnt",root).forEach(function(el){var to=+el.dataset.to,suf=el.dataset.suf||"",t0=null;el.textContent="0"+suf;
+ T(function(){function st(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1200,1);el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+suf;if(p<1&&slides[cur].contains(el))requestAnimationFrame(st)}requestAnimationFrame(st)},600)})}
+var NAMES=["يوسف خالد زكي","كريم أحمد الدسوقي","إسلام مصطفى فرج","خالد محمد الجمال","عبدالله عبدالرحمن رمضان","علي صلاح منصور","حسن إبراهيم الشرقاوي"];
+function phone(){
+ var el=$("#ph");
+ el.innerHTML='<div class="notch"></div><div class="scr"><div class="ph-top"><span class="lg">'+logo()+'</span><div><b>أولى أول</b><small>رائد أولى أول</small></div></div>'+
+  '<div class="ph-sum"><div><b id="pp">40</b>حاضر</div><div class="a"><b id="pa">0</b>غائب</div><div><b>40</b>الإجمالي</div></div>'+
+  NAMES.map(function(n,i){return'<div class="ph-row" data-r="'+i+'"><span class="n">'+(i+1)+'</span><span>'+n+'</span><em>حاضر</em></div>'}).join("")+
+  '<div class="ph-btn" id="pbtn">تسجيل الغياب (0 غائب)</div><div class="ph-toast" id="ptoast">✓ اتسجّل الغياب</div>'+
+  '<div class="ph-login" id="plog"><span class="lg">'+logo()+'</span><b style="font-size:22px;color:#0b3b5c">راصد</b><div class="f" id="pu"></div><div class="f" id="pw"></div><div class="go">دخول</div></div>'+
+  '<span class="tap" id="ptap" style="top:560px;left:140px;opacity:0"></span></div>';
+ var scr=el.querySelector(".scr"),tap=$("#ptap"),ab=0;
+ function at(x,y){tap.style.opacity=1;tap.style.left=x+"px";tap.style.top=y+"px"}
+ function press(){tap.classList.add("press");T(function(){tap.classList.remove("press")},180)}
+ function typeIn(e,txt,cb){var i=0;(function k(){e.textContent=txt.slice(0,++i)+(e.id==="pw"?"":"");if(i<txt.length)T(k,90);else cb&&cb()})()}
+ function mark(i){var r=scr.querySelector('[data-r="'+i+'"]'),y=r.offsetTop+r.offsetHeight/2-19;at(180,y);T(function(){press();r.classList.add("abs");r.querySelector("em").textContent="غائب";ab++;$("#pa").textContent=ab;$("#pp").textContent=40-ab;$("#pbtn").textContent="تسجيل الغياب ("+ab+" غائب)"},650)}
+ function run(){
+  ab=0;$("#plog").style.opacity=1;$("#plog").style.display="flex";$("#pu").textContent="";$("#pw").textContent="";
+  scr.querySelectorAll(".ph-row").forEach(function(r){r.classList.remove("abs");r.querySelector("em").textContent="حاضر"});
+  $("#pa").textContent=0;$("#pp").textContent=40;$("#pbtn").textContent="تسجيل الغياب (0 غائب)";$("#pbtn").classList.remove("done");$("#ptoast").classList.remove("show");
+  T(function(){typeIn($("#pu"),"raed1",function(){typeIn($("#pw"),"••••",function(){at(150,385);T(function(){press();T(function(){$("#plog").style.opacity=0;T(function(){$("#plog").style.display="none"},400)},250)},650)})})},500);
+  T(function(){mark(1)},3600);T(function(){mark(3)},4700);T(function(){mark(5)},5800);
+  T(function(){at(150,585);T(function(){press();$("#pbtn").classList.add("done");$("#pbtn").textContent="✓ اتسجّل";$("#ptoast").classList.add("show")},650)},7000);
+  T(function(){tap.style.opacity=0},8300);T(run,10500);
+ }
+ run();
+}
+function offline(){
+ var A=$("#offA"),B=$("#offB"),R=$("#offRun");
+ function set(a,ac,b,bc,go){A.textContent=a;A.className="state-chip "+ac;B.textContent=b;B.className="state-chip "+bc;R.classList.toggle("go",go)}
+ function loop(){set("مفيش نت","st-off","مستني…","st-wait",false);
+  T(function(){set("محفوظ — في انتظار الإرسال","st-wait","مستني…","st-wait",false)},1800);
+  T(function(){set("النت رجع ✓","st-ok","بيستقبل…","st-wait",true)},4000);
+  T(function(){set("اتبعت ✓","st-ok","✓ اتحفظ","st-ok",false)},5800);
+  T(loop,8500)}
+ loop();
+}
+function dashChart(){var h=[40,55,35,62,48,70,44,38,58,66,30],el=$("#mdc");el.innerHTML=h.map(function(v,i){return'<i style="height:'+v+'%;--i:'+i+'"'+(i===h.length-1?' class="t"':'')+'></i>'}).join("")}
+function botPrev(){var el=$("#botPrev");el.innerHTML='<div class="chat" style="height:100%;width:100%"><div class="ch-top" style="padding-top:34px"><span class="av" style="color:#0f766e">'+ico("bot")+'</span><div><b>مساعد المدرسة</b><small>متصل</small></div></div><div class="ch-msgs" id="bpm"></div></div>';
+ var m=$("#bpm"),seq=[["me","أنا غبت كام يوم؟"],["bot","غبت ٣ أيام من بداية الترم، ونسبة حضورك ٩١٪ 👏"],["me","ودرجة العربي في أكتوبر؟"],["bot","٤٢ من ٤٥ — ممتاز 🌟"]];
+ function step(i){if(i>=seq.length){T(function(){m.innerHTML="";step(0)},3000);return}var d=document.createElement("div");d.className="msg "+seq[i][0];d.style.fontSize="13px";d.textContent=seq[i][1];m.appendChild(d);T(function(){step(i+1)},1500)}
+ step(0)}
+function enter(id){
+ if(id==="s-raed")phone();
+ if(id==="s-offline")offline();
+ if(id==="s-admin"){dashChart();countUp(slides[cur])}
+ if(id==="s-alerts")countUp(slides[cur]);
+ if(id==="s-bot")botPrev();
+ if(id==="s-more")$$(".flip").forEach(function(f){f.classList.remove("open")});
+}
+
+/* ---------- نوافذ الديمو ---------- */
+function openM(title,cls,html,link){$("#mtitle").textContent=title;$("#mbox").className=cls;$("#mbody").innerHTML=html;
+ var o=$("#mopen");if(link){o.style.display="";o.href=link}else o.style.display="none";$("#modal").classList.add("show")}
+function closeM(){$("#modal").classList.remove("show");$("#mbody").innerHTML="";clearInterval(sheetTimer)}
+$("#mclose").onclick=closeM;$("#modal").onclick=function(e){if(e.target===this)closeM()};
+function frame(src){return'<iframe src="'+src+'" title="ديمو" allow="clipboard-write"></iframe>'}
+function demo(k){
+ if(k==="raed")openM("تطبيق الرائد — تجريبي","m-phone",frame("raed.html?demo=1&as=raed1"),"raed.html?demo=1&as=raed1");
+ else if(k==="raed3")openM("رائد أولى ثالث — فصله بس","m-phone",frame("raed.html?demo=1&as=raed3"),"raed.html?demo=1&as=raed3");
+ else if(k==="raed-login"){try{localStorage.removeItem("rased_session_raed_demo")}catch(e){}openM("شاشة دخول الرائد","m-phone",frame("raed.html?demo=1&as=raed1"),"raed.html?demo=1&as=raed1")}
+ else if(k==="admin")openM("لوحة الإدارة — تجريبي","m-desk",frame("admin.html?demo=1&as=admin"),"admin.html?demo=1&as=admin");
+ else if(k==="sheet")sheetDemo();
+ else if(k==="students")studentsDemo();
+ else if(k==="grades")gradesDemo();
+ else if(k==="chat")chatDemo();
+}
+
+/* شيت الغياب وهو بيتملي */
+var sheetTimer=null;
+var DAYS=["٤","٥","٧","٨","١١","١٢","١٣","١٤","١٥"],SN=["يوسف خالد زكي","كريم أحمد الدسوقي","إسلام مصطفى فرج","خالد محمد الجمال","عبدالله عبدالرحمن رمضان","علي صلاح منصور","حسن إبراهيم الشرقاوي","إبراهيم فتحي البنا","مازن حسن المصري","زياد عادل عيسى"];
+function sheetDemo(){
+ var rnd=function(i,j){return((i*7+j*13)%11===0)||(i===8&&j%5!==0)||(i===3&&j%2===0)};
+ var h='<div class="sheet-demo"><b style="font-size:18px;color:#166534">📗 راصد - الغياب</b> <span class="note-sd">(شكل توضيحي ببيانات تجريبية)</span><div class="sd-tabs"><span class="on">غياب أولى أول</span><span>غياب أولى ثاني</span><span>غياب أولى ثالث</span><span>…</span></div><div class="sd-grid"><table id="sdt"><thead><tr><th>كود</th><th>الاسم</th><th>إجمالي</th>'+DAYS.map(function(d){return'<th>'+d+' أكتوبر</th>'}).join("")+'<th id="newh" style="background:#f5b544;color:#3b2a00">١٨ أكتوبر</th></tr></thead><tbody>';
+ SN.forEach(function(n,i){var t=0;var cells=DAYS.map(function(d,j){var a=rnd(i,j);if(a)t++;return'<td class="'+(a?"x":"")+'">'+(a?"غ":"ح")+'</td>'}).join("");h+='<tr><td>'+(1001+i)+'</td><td class="nm">'+n+'</td><td class="tot" data-t="'+t+'"><b>'+t+'</b></td>'+cells+'<td class="nd"></td></tr>'});
+ h+='</tbody></table></div><p class="note-sd">⬅ العمود الأصفر بيتملي لوحده أول ما الرائد يدوس «تسجيل الغياب»، والإجمالي بيتحسب لوحده.</p><div class="acts" style="margin-top:10px"><button class="act" id="sdGo" style="font-size:16px;padding:10px 16px">▶ اعرض تاني</button></div></div>';
+ openM("شكل ملف الغياب في Google Sheets","m-panel",h);
+ function fill(){var rows=$$("#sdt tbody tr"),i=0;rows.forEach(function(r){var c=r.querySelector(".nd");c.textContent="";c.className="nd";var tc=r.querySelector(".tot");tc.innerHTML="<b>"+tc.dataset.t+"</b>"});
+  clearInterval(sheetTimer);sheetTimer=setInterval(function(){if(i>=rows.length){clearInterval(sheetTimer);return}var r=rows[i],c=r.querySelector(".nd"),a=(i===3||i===8);c.textContent=a?"غ":"ح";c.className="nd new"+(a?" x":"");if(a){var tc=r.querySelector(".tot");tc.innerHTML="<b>"+(+tc.dataset.t+1)+"</b>"}i++},260)}
+ fill();$("#sdGo").onclick=fill;
+}
+function studentsDemo(){
+ var h='<div class="sheet-demo"><b style="font-size:18px;color:#166534">📗 راصد - الطلاب</b> <span class="note-sd">(شكل توضيحي)</span><div class="sd-tabs"><span>المستخدمين</span><span>الفصول</span><span class="on">أولى أول</span><span>أولى ثاني</span><span>…</span></div><div class="sd-grid"><table><thead><tr><th>student_id</th><th>name</th></tr></thead><tbody>'+
+  SN.map(function(n,i){return'<tr><td>'+(1001+i)+'</td><td class="nm">'+n+'</td></tr>'}).join("")+'<tr><td style="color:#b07800">(تلقائي)</td><td class="nm" style="color:#b07800">طالب جديد ← اكتب اسمه بس</td></tr></tbody></table></div>'+
+  '<p class="note-sd">• تاب لكل فصل بأسماء طلابه. • لو عدّلت اسم هنا بيتعدّل في التطبيق وفي ملف الغياب. • الطالب الجديد بياخد كود لوحده.</p></div>';
+ openM("شكل ملف الطلاب في Google Sheets","m-panel",h);
+}
+
+/* ديمو درجات المدرسين */
+var GM=["سبتمبر","أكتوبر","نوفمبر","ديسمبر"],gMon=1,GD={};
+function gradesDemo(){
+ var h='<div class="gd"><span class="demo-flag" style="position:static;display:inline-block;margin-bottom:10px">ديمو — فكرة مستقبلية</span><div class="gd-top"><b>مدرس اللغة العربية</b><select id="gcls"><option>أولى أول</option><option>أولى ثاني</option><option>أولى ثالث</option></select><div class="mtabs" id="gmt"></div></div>'+
+  '<table><thead><tr><th>الطالب</th><th>تقييم ١<br>/٥</th><th>تقييم ٢<br>/٥</th><th>تقييم ٣<br>/٥</th><th>تقييم ٤<br>/٥</th><th>أعمال السنة<br>/٢٠</th><th>امتحان الشهر<br>/٢٥</th><th>المجموع<br>/٤٥</th><th>السلوك</th></tr></thead><tbody id="gtb"></tbody></table>'+
+  '<div class="gd-foot"><button class="act" id="gsave" style="font-size:16px;padding:10px 18px">💾 حفظ الشهر</button><span class="gd-msg" id="gmsg"></span></div><div class="sheet-prev" id="gprev"></div></div>';
+ openM("ديمو: تسجيل درجات المدرسين","m-panel",h);
+ function key(){return $("#gcls").value+"|"+gMon}
+ function seed(){var k=key();if(GD[k])return GD[k];GD[k]=SN.slice(0,6).map(function(n,i){var b=(i*3+gMon*5)%4;return gMon<1?{e:[5-b%2,4,5,4+(b%2)],x:20+b,beh:"ممتاز"}:gMon===1?{e:["","","",""],x:"",beh:""}:{e:["","","",""],x:"",beh:""}});if(gMon===1){GD[k][0]={e:[5,4,5,5],x:23,beh:"ممتاز"};GD[k][1]={e:[4,4,3,5],x:19,beh:"جيد جدًا"}}return GD[k]}
+ function tabs(){$("#gmt").innerHTML=GM.map(function(m,i){return'<button data-m="'+i+'" class="'+(i===gMon?"on":"")+'">'+m+'</button>'}).join("")}
+ function rows(){var d=seed();$("#gtb").innerHTML=d.map(function(r,i){return'<tr data-i="'+i+'"><td>'+SN[i]+'</td>'+[0,1,2,3].map(function(k){return'<td><input data-k="e'+k+'" data-max="5" inputmode="decimal" value="'+r.e[k]+'"></td>'}).join("")+
+  '<td class="tt cw">—</td><td><input data-k="x" data-max="25" inputmode="decimal" value="'+r.x+'"></td><td class="tt tot">—</td><td><select data-k="beh">'+["","ممتاز","جيد جدًا","جيد","مقبول"].map(function(b){return'<option'+(r.beh===b?" selected":"")+'>'+b+'</option>'}).join("")+'</select></td></tr>'}).join("");
+  $$("#gtb tr").forEach(calc);$("#gmsg").textContent="";$("#gprev").classList.remove("show")}
+ function num(v){return v!==""&&!isNaN(v)}
+ function calc(tr){var d=seed()[+tr.dataset.i],cw=0,any=false,bad=false;
+  $$("input",tr).forEach(function(inp){var v=inp.value.trim(),mx=+inp.dataset.max;inp.classList.toggle("bad",v!==""&&(!num(v)||+v<0||+v>mx));if(inp.classList.contains("bad"))bad=true;
+   var k=inp.dataset.k;if(k==="x")d.x=v;else d.e[+k.slice(1)]=v});
+  d.e.forEach(function(v){if(num(v)){cw+=+v;any=true}});d.beh=$("select",tr).value;
+  tr.querySelector(".cw").textContent=any?cw:"—";tr.querySelector(".tot").textContent=(any||num(d.x))?cw+(num(d.x)?+d.x:0):"—";return!bad}
+ tabs();rows();
+ $("#gmt").onclick=function(e){var b=e.target.closest("button");if(!b)return;gMon=+b.dataset.m;tabs();rows()};
+ $("#gcls").onchange=rows;
+ $("#gtb").addEventListener("input",function(e){calc(e.target.closest("tr"))});$("#gtb").addEventListener("change",function(e){calc(e.target.closest("tr"))});
+ $("#gsave").onclick=function(){var ok=$$("#gtb tr").map(calc).every(Boolean);if(!ok){$("#gmsg").style.color="var(--red)";$("#gmsg").textContent="في درجة أكبر من الحد أو مش رقم";return}
+  var d=seed(),sheet="درجات "+GM[gMon];$("#gmsg").style.color="";$("#gmsg").textContent="✓ اتحفظ في شيت «"+sheet+"» — تاب «"+$("#gcls").value+" — اللغة العربية»";
+  $("#gprev").innerHTML='<div class="sh-h">📗 '+sheet+' › '+$("#gcls").value+' — اللغة العربية</div><table><thead><tr><th>الطالب</th><th>ت١</th><th>ت٢</th><th>ت٣</th><th>ت٤</th><th>امتحان</th><th>المجموع</th><th>السلوك</th></tr></thead><tbody>'+
+   d.map(function(r,i){var cw=0;r.e.forEach(function(v){if(num(v))cw+=+v});return'<tr><td>'+SN[i]+'</td>'+r.e.map(function(v){return'<td>'+(v===""?"":v)+'</td>'}).join("")+'<td>'+r.x+'</td><td><b>'+(cw+(num(r.x)?+r.x:0))+'</b></td><td>'+r.beh+'</td></tr>'}).join("")+'</tbody></table>';
+  $("#gprev").classList.add("show")};
+}
+
+/* ديمو شات بوت */
+function chatDemo(){
+ var h='<div class="chat"><div class="ch-top"><span class="av" style="color:#0f766e">'+ico("bot")+'</span><div><b>مساعد مدرسة أبو شقرة</b><small>ديمو — بيانات تجريبية</small></div></div><div class="ch-msgs" id="cm"></div><div class="ch-quick" id="cq"></div></div>';
+ openM("ديمو: شات بوت المدرسة","",h);
+ var m=$("#cm"),q=$("#cq"),logged=false;
+ var A={
+  "أنا غبت كام يوم؟":"غبت ٣ أيام من بداية الترم:\n• ١٤ أكتوبر\n• ٧ أكتوبر\n• ٢٢ سبتمبر\nنسبة حضورك ٩١٪ 👏 كمّل كده!",
+  "درجاتي في أكتوبر؟":"درجات شهر أكتوبر:\n• العربي: ٤٢ / ٤٥\n• الإنجليزي: ٣٨ / ٤٥\n• الرياضيات: ٤٠ / ٤٥\nالمجموع: ١٢٠ من ١٣٥ 🌟",
+  "امتحانات الشهر إمتى؟":"امتحانات شهر نوفمبر هتبدأ يوم [التاريخ] ⏰\nهبعتلك تذكير قبلها بيوم.",
+  "مين رائد فصلي؟":"رائد فصل أولى أول هو أ/ [اسم الرائد] 👨‍🏫",
+  "عايز أكلم الإدارة":"تمام، هبلّغ الإدارة إنك عايز تتواصل، وهيردوا عليك قريب ✅"
+ };
+ function add(who,txt){var d=document.createElement("div");d.className="msg "+who;d.textContent=txt;m.appendChild(d);m.scrollTop=m.scrollHeight}
+ function bot(txt,cb){var t=document.createElement("div");t.className="msg bot typing";t.innerHTML="<i></i><i></i><i></i>";m.appendChild(t);m.scrollTop=m.scrollHeight;setTimeout(function(){t.remove();add("bot",txt);cb&&cb()},900)}
+ function chips(list){q.innerHTML=list.map(function(x){return'<button>'+x+'</button>'}).join("")}
+ bot("أهلًا بيك في مساعد المدرسة 👋\nاكتب كود الطالب عشان أعرض بياناتك.",function(){chips(["كود الطالب: 1001"])});
+ q.onclick=function(e){var b=e.target.closest("button");if(!b)return;var t=b.textContent;add("me",t);q.innerHTML="";
+  if(!logged){logged=true;bot("أهلًا يا يوسف خالد 😊 — أولى أول\nتحب تعرف إيه؟",function(){chips(Object.keys(A))});return}
+  bot(A[t]||"ثانية واحدة…",function(){chips(Object.keys(A))})};
+}
+
+/* البداية */
+var h0=parseInt((location.hash||"").slice(1),10);slides[0].classList.add("on");go(h0>0&&h0<=slides.length?h0-1:0);
+})();
+</script>
+</body>
+</html>
