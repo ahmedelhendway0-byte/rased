@@ -1,6 +1,6 @@
 /* راصد — بيخلي التطبيق يفتح من غير نت لما يكون مرفوع على موقع (https).
    لو عدّلت أي ملف، زوّد رقم النسخة عشان الأجهزة تاخد التعديل. */
-var V = "rased-v8-2";
+var V = "rased-v8-3";
 var FILES = ["raed.html", "admin.html", "rased.css", "rased-core.js", "config.js", "presentation.html"];
 
 self.addEventListener("install", function (e) {

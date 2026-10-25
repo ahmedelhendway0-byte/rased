@@ -140,7 +140,8 @@ function refresh(){$("rf").disabled=true;
   if(!RS.session()){location.reload();return}
   if(!D)$("view").innerHTML='<div class="empty">مفيش نت ولسه البيانات متحمّلتش على الجهاز ده. شغّل النت مرة واحدة.</div>';
   else RS.toast("مفيش اتصال — بتشوف آخر نسخة محفوظة","bad")}).then(function(){$("rf").disabled=false;drawNet();upd()})}
-function upd(){$("upd").textContent=D?"آخر تحديث من الشيت: "+RS.arTime(D.fetchedAt)+" · Powered by HINDAWY":"Powered by HINDAWY"}
+function upd(){var f=$("upd");f.textContent=D?"آخر تحديث من الشيت: "+RS.arTime(D.fetchedAt)+" · Powered by ":"Powered by ";
+ var a=document.createElement("a");a.href="https://ahmedelhendway0-byte.github.io/portfolio/";a.target="_blank";a.rel="noopener";a.textContent="HINDAWY";f.appendChild(a)}
 $("rf").onclick=refresh;
 window.addEventListener("online",function(){if(S)refresh()});
 setInterval(function(){if(S&&navigator.onLine)refresh()},(CONFIG.REFRESH_MINUTES||2)*60000);
